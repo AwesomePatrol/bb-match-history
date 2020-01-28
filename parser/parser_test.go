@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -26,4 +27,6 @@ func TestParseSingleMatch(t *testing.T) {
 	t.Log("winner:", match.NorthWon)
 	t.Log(match.Length)
 	t.Log(match.Difficulty)
+	res, _ := json.Marshal(match)
+	t.Log(string(res))
 }

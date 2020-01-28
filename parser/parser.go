@@ -11,6 +11,19 @@ import (
 	"github.com/awesomepatrol/bb-match-history/stats"
 )
 
+func makeUnique(players []*stats.Player) []*stats.Player {
+	m := make(map[string]struct{})
+	for _, p := range players {
+		m[p.Name] = struct{}{}
+	}
+	iter := 0
+	for k := range m {
+		players[iter].Name = k
+		iter++
+	}
+	return players[:iter]
+}
+
 func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 	scanner := bufio.NewScanner(reader)
 	match := new(stats.Match)
@@ -28,6 +41,9 @@ func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
+	match.Players = makeUnique(match.Players)
+	match.North.Players = makeUnique(match.North.Players)
+	match.South.Players = makeUnique(match.South.Players)
 	return match, nil
 }
 
@@ -85,6 +101,7 @@ func ParseLine(match *stats.Match, line string) {
 		if err != nil {
 			break
 		}
+		match.Players = append(match.Players, player)
 		match.North.Players = append(match.North.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line})
 	case strings.HasSuffix(line, "has joined team south!"):
@@ -93,6 +110,7 @@ func ParseLine(match *stats.Match, line string) {
 		if err != nil {
 			break
 		}
+		match.Players = append(match.Players, player)
 		match.South.Players = append(match.South.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line})
 	case strings.HasSuffix(line, "has won!"):

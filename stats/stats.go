@@ -9,7 +9,7 @@ import (
 
 type Player struct {
 	gorm.Model
-	Name    string
+	Name    string   `gorm:"UNIQUE"`
 	History []*Match `gorm:"many2many:player_match;"`
 }
 
@@ -19,7 +19,7 @@ type MVPplayer struct {
 }
 
 type Team struct {
-	Players     []*Player `gorm:"many2many:player_match;"`
+	Players     []*Player
 	MVPdefender MVPplayer
 	MVPbuilder  MVPplayer
 	MVPdeaths   MVPplayer
@@ -41,7 +41,6 @@ const (
 )
 
 type Event struct {
-	gorm.Model
 	Timestamp time.Time
 	EventType
 	Payload string
@@ -61,6 +60,7 @@ const (
 
 type Match struct {
 	gorm.Model
+	Players      []*Player `gorm:"many2many:player_match;"`
 	South, North Team
 	Start, End   time.Time
 	Length       time.Duration
