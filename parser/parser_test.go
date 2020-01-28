@@ -23,4 +23,5 @@ func TestParseSingleMatch(t *testing.T) {
 	for _, event := range match.Timeline {
 		t.Log(event)
 	}
+	t.Log(match.Length)
 }

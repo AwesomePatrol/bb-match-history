@@ -34,6 +34,7 @@ const (
 	LeaveGame
 	JoinTeam
 	LeaveTeam
+	PlayerDeath
 	DifficultyChange
 	WinnerAnnounce
 	GameTimeAnnounce
@@ -50,6 +51,7 @@ type Match struct {
 	gorm.Model
 	South, North Team
 	Start, End   time.Time
+	Length       time.Duration
 	NorthWon     bool
 	Timeline     []*Event
 }
