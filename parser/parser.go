@@ -27,6 +27,8 @@ func makeUnique(players []*stats.Player) []*stats.Player {
 func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 	scanner := bufio.NewScanner(reader)
 	match := new(stats.Match)
+	match.South.IsNorth = false
+	match.North.IsNorth = true
 	ongoing := true
 	for scanner.Scan() && ongoing {
 		line := scanner.Text()

@@ -8,8 +8,7 @@ import (
 )
 
 type Player struct {
-	gorm.Model
-	Name    string   `gorm:"UNIQUE"`
+	Name    string   `gorm:"PRIMARY_KEY"`
 	History []*Match `gorm:"many2many:player_match;"`
 }
 
@@ -19,10 +18,13 @@ type MVPplayer struct {
 }
 
 type Team struct {
-	Players     []*Player
+	gorm.Model
+	Players     []*Player `gorm:"many2many:player_team;"`
 	MVPdefender MVPplayer
 	MVPbuilder  MVPplayer
 	MVPdeaths   MVPplayer
+	IsNorth     bool
+	MatchID     int64
 }
 
 type EventType int
@@ -41,9 +43,11 @@ const (
 )
 
 type Event struct {
+	gorm.Model
 	Timestamp time.Time
 	EventType
 	Payload string
+	MatchID int64
 }
 
 type Difficulty int
@@ -58,13 +62,22 @@ const (
 	Insane
 )
 
+func (p *Difficulty) Scan(value interface{}) error {
+	*p = Difficulty(value.(int64))
+	return nil
+}
+
+func (p Difficulty) Value() (string, error) {
+	return string(p), nil
+}
+
 type Match struct {
 	gorm.Model
 	Players      []*Player `gorm:"many2many:player_match;"`
-	South, North Team
+	South, North Team      `gorm:"foreignkey:MatchID"`
 	Start, End   time.Time
 	Length       time.Duration
 	NorthWon     bool
-	Difficulty
-	Timeline []*Event
+	Difficulty   `sql:"type:difficulty"`
+	Timeline     []*Event `gorm:"foreignkey:MatchID"`
 }
