@@ -25,4 +25,5 @@ func TestParseSingleMatch(t *testing.T) {
 	}
 	t.Log("winner:", match.NorthWon)
 	t.Log(match.Length)
+	t.Log(match.Difficulty)
 }

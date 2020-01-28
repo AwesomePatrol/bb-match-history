@@ -47,11 +47,24 @@ type Event struct {
 	Payload string
 }
 
+type Difficulty int
+
+const (
+	Peaceful Difficulty = iota
+	PieceOfCake
+	Easy
+	Normal
+	Hard
+	Nightmare
+	Insane
+)
+
 type Match struct {
 	gorm.Model
 	South, North Team
 	Start, End   time.Time
 	Length       time.Duration
 	NorthWon     bool
-	Timeline     []*Event
+	Difficulty
+	Timeline []*Event
 }

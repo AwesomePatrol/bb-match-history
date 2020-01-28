@@ -33,6 +33,35 @@ func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 
 func ParseLine(match *stats.Match, line string) {
 	switch {
+	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
+		var difficulty string
+
+		_, err := fmt.Sscanf(line, ">> Map difficulty has changed to %s difficulty!", &difficulty)
+		if err != nil {
+			break
+		}
+
+		var diffConst stats.Difficulty
+		switch difficulty {
+		case "Peaceful":
+			diffConst = stats.Peaceful
+		case "Piece of cake":
+			diffConst = stats.PieceOfCake
+		case "Easy":
+			diffConst = stats.Easy
+		case "Normal":
+			diffConst = stats.Normal
+		case "Hard":
+			diffConst = stats.Hard
+		case "Nightmare":
+			diffConst = stats.Nightmare
+		case "Insane":
+			diffConst = stats.Insane
+		default:
+			log.Println("unknown difficulty:", difficulty)
+		}
+		match.Difficulty = diffConst
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line})
 	case strings.HasPrefix(line, "Status:"):
 	case strings.HasSuffix(line, "has joined the game"):
 		event := new(stats.Event)
