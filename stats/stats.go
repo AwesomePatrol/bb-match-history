@@ -8,8 +8,7 @@ import (
 )
 
 type Player struct {
-	Name    string   `gorm:"PRIMARY_KEY"`
-	History []*Match `gorm:"many2many:player_match;"`
+	Name string `gorm:"PRIMARY_KEY"`
 }
 
 type MVPplayer struct {
@@ -23,7 +22,7 @@ type Team struct {
 	MVPdefender MVPplayer
 	MVPbuilder  MVPplayer
 	MVPdeaths   MVPplayer
-	IsNorth     bool
+	IsNorth     bool `json:"-"`
 	MatchID     int64
 }
 
