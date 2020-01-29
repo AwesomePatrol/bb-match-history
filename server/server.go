@@ -14,8 +14,15 @@ func OpenHTTP() {
 	router = gin.Default()
 
 	router.Static("/assets", "./assets")
-	router.GET("/api/player/history/:name", func(c *gin.Context) {
-		//name := c.Param("name")
+	router.GET("/api/player/:name/history", func(c *gin.Context) {
+		name := c.Param("name")
+		matches, err := stats.QueryPlayerMatches(name)
+		if err != nil {
+			// FIXME
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, matches)
 	})
 	router.GET("/api/match/short/:id", func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))

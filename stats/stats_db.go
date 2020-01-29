@@ -64,3 +64,8 @@ func QueryMatchAll() (matches []Match, err error) {
 	err = db.Limit(128).Order("id desc").Find(&matches).Error
 	return
 }
+
+func QueryPlayerMatches(name string) ([]Match, error) {
+	player := Player{Name: name}
+	return player.History, db.Preload("History").First(&player).Error
+}

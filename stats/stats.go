@@ -21,7 +21,8 @@ type EmptyModel struct {
 }
 
 type Player struct {
-	Name string `gorm:"PRIMARY_KEY"`
+	Name    string  `gorm:"PRIMARY_KEY"`
+	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
 type MVPplayer struct {
