@@ -86,7 +86,7 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	for _, e := range m.Embeds {
 		line := e.Description
 		log.Println("parsing:", line)
-		parser.ParseLine(match, line)
+		parser.ParseLineEmbed(match, line)
 	}
 }
 
