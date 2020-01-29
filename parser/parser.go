@@ -24,11 +24,16 @@ func makeUnique(players []*stats.Player) []*stats.Player {
 	return players[:iter]
 }
 
-func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
-	scanner := bufio.NewScanner(reader)
-	match := new(stats.Match)
+func NewMatch() (match *stats.Match) {
+	match = new(stats.Match)
 	match.South.IsNorth = false
 	match.North.IsNorth = true
+	return
+}
+
+func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
+	scanner := bufio.NewScanner(reader)
+	match := NewMatch()
 	ongoing := true
 	for scanner.Scan() && ongoing {
 		line := scanner.Text()
@@ -43,10 +48,14 @@ func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
+	FixPlayers(match)
+	return match, nil
+}
+
+func FixPlayers(match *stats.Match) {
 	match.Players = makeUnique(match.Players)
 	match.North.Players = makeUnique(match.North.Players)
 	match.South.Players = makeUnique(match.South.Players)
-	return match, nil
 }
 
 func ParseLine(match *stats.Match, line string) {

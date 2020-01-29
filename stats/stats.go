@@ -12,18 +12,18 @@ type Player struct {
 }
 
 type MVPplayer struct {
-	Player *Player
-	Stat   int
+	gorm.Model
+	Name  string
+	Title string
+	Stat  int
 }
 
 type Team struct {
 	gorm.Model
-	Players     []*Player `gorm:"many2many:player_team;"`
-	MVPdefender MVPplayer
-	MVPbuilder  MVPplayer
-	MVPdeaths   MVPplayer
-	IsNorth     bool `json:"-"`
-	MatchID     int64
+	Players []*Player    `gorm:"many2many:player_team;"`
+	MVPs    []*MVPplayer `gorm:"many2many:mvp_team;"`
+	IsNorth bool         `json:"-"`
+	MatchID int64
 }
 
 type EventType int
@@ -49,7 +49,7 @@ type Event struct {
 	MatchID int64
 }
 
-type Difficulty int
+type Difficulty int64
 
 const (
 	Peaceful Difficulty = iota
@@ -78,5 +78,5 @@ type Match struct {
 	Length       time.Duration
 	NorthWon     bool
 	Difficulty   `sql:"type:difficulty"`
-	Timeline     []*Event `gorm:"foreignkey:MatchID"`
+	Timeline     []*Event `gorm:"foreignkey:MatchID" json:",omitempty"`
 }
