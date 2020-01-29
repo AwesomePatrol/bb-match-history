@@ -3,27 +3,40 @@ package stats
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+type Model struct {
+	ID        uint       `gorm:"primary_key"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `sql:"index" json:"-"`
+}
+
+type EmptyModel struct {
+	ID        uint       `gorm:"primary_key" json:"-"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `sql:"index" json:"-"`
+}
 
 type Player struct {
 	Name string `gorm:"PRIMARY_KEY"`
 }
 
 type MVPplayer struct {
-	gorm.Model
+	EmptyModel
 	Name  string
 	Title string
 	Stat  int
 }
 
 type Team struct {
-	gorm.Model
+	EmptyModel
 	Players []*Player    `gorm:"many2many:player_team;"`
-	MVPs    []*MVPplayer `gorm:"many2many:mvp_team;"`
+	MVPs    []*MVPplayer `gorm:"many2many:mvp_team;" json:",omitempty"`
 	IsNorth bool         `json:"-"`
-	MatchID int64
+	MatchID int64        `json:"-"`
 }
 
 type EventType int
@@ -42,11 +55,11 @@ const (
 )
 
 type Event struct {
-	gorm.Model
+	EmptyModel
 	Timestamp time.Time
 	EventType
 	Payload string
-	MatchID int64
+	MatchID int64 `json:"-"`
 }
 
 type Difficulty int64
@@ -71,10 +84,10 @@ func (p Difficulty) Value() (string, error) {
 }
 
 type Match struct {
-	gorm.Model
-	Players      []*Player `gorm:"many2many:player_match;"`
-	South, North Team      `gorm:"foreignkey:MatchID"`
-	Start, End   time.Time
+	Model
+	Players      []*Player `gorm:"many2many:player_match;" json:",omitempty"`
+	South, North *Team     `gorm:"foreignkey:MatchID" json:",omitempty"`
+	Start, End   time.Time `json:",omitempty"`
 	Length       time.Duration
 	NorthWon     bool
 	Difficulty   `sql:"type:difficulty"`

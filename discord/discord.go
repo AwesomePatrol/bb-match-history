@@ -14,14 +14,13 @@ import (
 const masterID = "213745524279345152"
 
 var (
-	match         *stats.Match
-	bot           *discordgo.Session
-	validChannels map[string]interface{}
+	match *stats.Match
+	bot   *discordgo.Session
 )
+var validChannels = map[string]interface{}{"671815098427244567": nil}
 
 func init() {
 	match = parser.NewMatch()
-	validChannels = make(map[string]interface{})
 }
 
 func OpenBot(token string) {
@@ -60,9 +59,9 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == `**\*\*\* Map is restarting! \*\*\***` {
 		parser.FixPlayers(match)
 		stats.InsertMatch(match)
-		match = parser.NewMatch()
 
 		ret, err := json.Marshal(match)
+		match = parser.NewMatch()
 		if err != nil {
 			log.Println(err)
 			return

@@ -26,6 +26,8 @@ func makeUnique(players []*stats.Player) []*stats.Player {
 
 func NewMatch() (match *stats.Match) {
 	match = new(stats.Match)
+	match.South = new(stats.Team)
+	match.North = new(stats.Team)
 	match.South.IsNorth = false
 	match.North.IsNorth = true
 	return
