@@ -57,3 +57,10 @@ func QueryMatchLong(id int) (match *Match, err error) {
 	err = db.Where("match_id = ?", id).Find(&match.Timeline).Error
 	return
 }
+
+func QueryMatchAll() (matches []Match, err error) {
+	// TODO pagination?
+	matches = make([]Match, 0, 128)
+	err = db.Limit(128).Order("id desc").Find(&matches).Error
+	return
+}
