@@ -1,0 +1,49 @@
+baseURL = "http://bb.patrol.neutrino.re/site/"
+languageCode = "en-us"
+title = "Biter Battles - Match History"
+theme = "minimal-bootstrap-hugo-theme"
+
+[params]
+  description = "Biter Battles - Match History"
+  contentBackgroundColor = "#fff"
+  contentTextColor = "#212529"
+  contentLinkColor = "#007bff"
+  contentLinkHoverColor = "#0056b3"
+  navbarBackgroundColor = "#212529"
+  navbarLinkColor = "rgba(255, 255, 255, 0.75)"
+  navbarLinkHoverColor = "rgba(255, 255, 255, 1)"
+  wrapperMaxWidth = "800px"
+  faviconThemeColor = "#ffffff"
+
+[menu]
+  [[menu.nav]]
+  name = "Recent matches"
+  url = "/recent"
+  weight = 1
+  [[menu.nav]]
+  name = "Search"
+  url = "/search"
+  weight = 2
+  [[menu.nav]]
+  name = "About"
+  url = "/about"
+  weight = 3
+
+[markup]
+  defaultMarkdownHandler = "goldmark"
+  [markup.goldmark]
+    [markup.goldmark.extensions]
+      definitionList = true
+      footnote = true
+      linkify = true
+      strikethrough = true
+      table = true
+      taskList = true
+      typographer = true
+    [markup.goldmark.parser]
+      attribute = true
+      autoHeadingID = true
+    [markup.goldmark.renderer]
+      hardWraps = false
+      unsafe = true
+      xHTML = false
