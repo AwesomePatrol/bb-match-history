@@ -63,7 +63,7 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.Message) {
 
 func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Time) {
 	// Process map restart
-	if m.Content == `**\*\*\* Map is restarting! \*\*\***` {
+	if strings.Contains(m.Content, "Map is restarting!") {
 		parser.FixPlayers(match)
 		stats.InsertMatch(match)
 		match.End = t
@@ -104,7 +104,7 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines
 	}
 	beforeID := ch.LastMessageID
 	for {
-		msgs, err := s.ChannelMessages(chanID, 50, beforeID, "", "")
+		msgs, err := s.ChannelMessages(chanID, 64, beforeID, "", "")
 		if err != nil {
 			log.Println("failed to get messages from history:", err)
 			return
@@ -116,6 +116,8 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines
 		if ts, _ := discordgo.SnowflakeTimestamp(msgs[0].ID); ts.Before(t) {
 			log.Println("history: messages are too old")
 			break
+		} else {
+			log.Println("oldest message:", ts)
 		}
 		beforeID = msgs[len(msgs)-1].ID
 

@@ -115,7 +115,11 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 		var hours, minutes int
 		_, err := fmt.Sscanf(line, "Time - %d hours and %d minutes", &hours, &minutes)
 		if err != nil {
-			break
+			hours = 0
+			_, err := fmt.Sscanf(line, "Time - %d minutes", &minutes)
+			if err != nil {
+				break
+			}
 		}
 		match.Length = time.Hour*time.Duration(hours) + time.Minute*time.Duration(minutes)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.GameTimeAnnounce, Payload: line, Timestamp: t})

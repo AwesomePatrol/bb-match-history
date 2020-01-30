@@ -67,7 +67,7 @@ function addRecentMatchesEntry(tbl, match) {
     let row = $("<tr>")
       .append($("<td>").append(match.ID))
       .append($("<td>").append(ago.fromNow()))
-      .append($("<td>").append(match.Length))
+      .append($("<td>").append(moment.duration(match.Length/1000000).humanize()))
       .append($("<td>").append(winner))
       .append($("<td>").append(diffStr))
       .one("click", {ID: match.ID}, getMatchDetails);
