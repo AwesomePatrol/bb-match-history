@@ -61,6 +61,9 @@ func FixPlayers(match *stats.Match) {
 }
 
 func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
+	if match.Start.IsZero() {
+		match.Start = t
+	}
 	switch {
 	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
 		var difficulty string
@@ -92,6 +95,12 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 		match.Difficulty = diffConst
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line, Timestamp: t})
 	case strings.HasPrefix(line, "Server has"):
+		switch line {
+		case "Server has **started**":
+			match.Start = t
+		case "Server has **stopped**":
+			match.End = t
+		}
 	case strings.HasSuffix(line, "has won!"):
 		switch line {
 		case "Team South has won!":

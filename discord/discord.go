@@ -18,7 +18,7 @@ var (
 	match *stats.Match
 	bot   *discordgo.Session
 )
-var validChannels = map[string]interface{}{"671815098427244567": nil}
+var validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
 
 func init() {
 	match = parser.NewMatch()
@@ -54,12 +54,12 @@ func sendReplyInDM(s *discordgo.Session, recipientID string, content string) {
 		log.Println(err)
 	}
 }
-func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
+func processMatchMessages(s *discordgo.Session, m *discordgo.Message) {
 	t, _ := discordgo.SnowflakeTimestamp(m.ID)
 	_processMatchMessages(s, m, t)
 }
 
-func _processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate, t time.Time) {
+func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Time) {
 	// Process map restart
 	if m.Content == `**\*\*\* Map is restarting! \*\*\***` {
 		parser.FixPlayers(match)
@@ -73,7 +73,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate, t t
 			return
 		}
 		match.Start = t
-		log.Println(err)
+		log.Println(string(ret))
 		return
 	}
 
@@ -93,8 +93,47 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate, t t
 	}
 }
 
+func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines []*discordgo.Message) {
+	//TODO: filter by Author.ID
+	ch, err := s.Channel(chanID)
+	if err != nil {
+		log.Println("failed to get chan info:", err)
+		return
+	}
+	beforeID := ch.LastMessageID
+	for {
+		msgs, err := s.ChannelMessages(chanID, 50, beforeID, "", "")
+		if err != nil {
+			log.Println("failed to get messages from history:", err)
+			return
+		}
+		if len(msgs) == 0 {
+			log.Println("history: no more messages")
+			break
+		}
+		if ts, _ := discordgo.SnowflakeTimestamp(msgs[0].ID); ts.Before(t) {
+			log.Println("history: messages are too old")
+			break
+		}
+		beforeID = msgs[len(msgs)-1].ID
+
+		for _, msg := range msgs { // From newest to oldest
+			if msg.Author.ID == s.State.User.ID { // Ignore own
+				continue
+			}
+			if strings.HasPrefix(msg.Content, "**") || len(msg.Embeds) > 0 {
+				lines = append(lines, msg)
+			}
+		}
+	}
+	return
+}
+
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
-	log.Println("done")
+	lines := getRelevantHistory(s, chanID, t)
+	for i := len(lines) - 1; i >= 0; i-- { // switch order
+		processMatchMessages(s, lines[i])
+	}
 }
 
 func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -106,8 +145,8 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		sendReplyInDM(s, m.Author.ID, "channel "+m.ChannelID+" added")
 	}
 	if strings.HasPrefix(m.Content, "!parseHistory") {
-		var str string
-		_, err := fmt.Sscanf(m.Content, "!parseHistory %s", &str)
+		var str, chanID string
+		_, err := fmt.Sscanf(m.Content, "!parseHistory %s %s", &str, &chanID)
 		if err != nil {
 			log.Println("parseHistory command failed: scan:", err)
 			return
@@ -117,8 +156,8 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 			log.Println("parseHistory command failed: timestamp:", err)
 			return
 		}
-		sendReplyInDM(s, m.Author.ID, "parsing history from "+m.ChannelID+" started")
-		go parseHistory(s, m.ChannelID, t)
+		sendReplyInDM(s, m.Author.ID, "parsing history from "+chanID+" started")
+		go parseHistory(s, chanID, t)
 	}
 }
 
@@ -130,8 +169,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Process only added channels
 	if _, ok := validChannels[m.ChannelID]; ok {
-		log.Println(*m.Message)
-		processMatchMessages(s, m)
+		log.Println(*m.Message, m.Author.ID)
+		processMatchMessages(s, m.Message)
 	}
 
 	// Commands for master only

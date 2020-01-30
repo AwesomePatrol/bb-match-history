@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -27,6 +28,10 @@ func CloseDB() {
 }
 
 func InsertMatch(match *Match) error {
+	if len(match.Players) == 0 {
+		log.Println("skipping empty match:", match)
+		return nil
+	}
 	return db.Create(match).Error
 }
 

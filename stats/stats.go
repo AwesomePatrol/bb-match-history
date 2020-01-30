@@ -88,7 +88,8 @@ type Match struct {
 	Model
 	Players      []*Player `gorm:"many2many:player_match;" json:",omitempty"`
 	South, North *Team     `gorm:"foreignkey:MatchID" json:",omitempty"`
-	Start, End   time.Time `json:",omitempty"`
+	Start        time.Time `gorm:"UNIQUE" json:",omitempty"`
+	End          time.Time `json:",omitempty"`
 	Length       time.Duration
 	NorthWon     bool
 	Difficulty   `sql:"type:difficulty"`

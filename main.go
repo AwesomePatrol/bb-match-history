@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/awesomepatrol/bb-match-history/discord"
 	"github.com/awesomepatrol/bb-match-history/server"
 	"github.com/awesomepatrol/bb-match-history/stats"
 )
@@ -26,8 +27,8 @@ func main() {
 	stats.OpenDB(DB)
 	defer stats.CloseDB()
 
-	//discord.OpenBot(token)
-	//defer discord.CloseBot()
+	discord.OpenBot(token)
+	defer discord.CloseBot()
 
 	server.OpenHTTP()
 
