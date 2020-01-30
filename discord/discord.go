@@ -15,15 +15,15 @@ import (
 const masterID = "213745524279345152"
 
 var (
-	match *stats.Match
-	bot   *discordgo.Session
+	currentMatch *stats.Match
+	bot          *discordgo.Session
 )
 var validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
 
 const comfylatronID = "493392617258876948"
 
 func init() {
-	match = parser.NewMatch()
+	currentMatch = parser.NewMatch()
 }
 
 func OpenBot(token string) {
@@ -56,12 +56,12 @@ func sendReplyInDM(s *discordgo.Session, recipientID string, content string) {
 		log.Println(err)
 	}
 }
-func processMatchMessages(s *discordgo.Session, m *discordgo.Message) {
+func processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match) bool {
 	t, _ := discordgo.SnowflakeTimestamp(m.ID)
-	_processMatchMessages(s, m, t)
+	return _processMatchMessages(s, m, match, t)
 }
 
-func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Time) {
+func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match, t time.Time) bool {
 	for _, line := range strings.Split(m.Content, "\n") {
 		if len(line) < 4 {
 			continue
@@ -74,14 +74,12 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Ti
 			match.End = t
 
 			ret, err := json.Marshal(match)
-			match = parser.NewMatch()
 			if err != nil {
 				log.Println(err)
-				return
+				return true
 			}
-			match.Start = t
 			log.Println(string(ret))
-			return
+			return true
 		}
 
 		// Process bold messages
@@ -89,7 +87,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Ti
 			line := strings.Trim(line, "*")
 			log.Println("parsing:", line)
 			parser.ParseLine(match, line, t)
-			return
+			return false
 		}
 	}
 
@@ -99,6 +97,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Ti
 		log.Println("parsing:", line)
 		parser.ParseLineEmbed(match, line, t)
 	}
+	return false
 }
 
 func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines []*discordgo.Message) {
@@ -141,8 +140,9 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines
 
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t)
+	historyMatch := parser.NewMatch()
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
-		processMatchMessages(s, lines[i])
+		processMatchMessages(s, lines[i], historyMatch)
 	}
 }
 
@@ -180,7 +180,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Process only added channels
 	if _, ok := validChannels[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
-		processMatchMessages(s, m.Message)
+		if processMatchMessages(s, m.Message, currentMatch) {
+			currentMatch = parser.NewMatch()
+		}
 	}
 
 	// Commands for master only
