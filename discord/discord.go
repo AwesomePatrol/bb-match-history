@@ -62,29 +62,35 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.Message) {
 }
 
 func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, t time.Time) {
-	// Process map restart
-	if strings.Contains(m.Content, "Map is restarting!") {
-		parser.FixPlayers(match)
-		stats.InsertMatch(match)
-		match.End = t
+	for _, line := range strings.Split(m.Content, "\n") {
+		if len(line) < 4 {
+			continue
+		}
+		// Process map restart
+		if strings.Contains(line, "Map is restarting!") {
+			log.Println("GAME RESTART")
+			parser.FixPlayers(match)
+			stats.InsertMatch(match)
+			match.End = t
 
-		ret, err := json.Marshal(match)
-		match = parser.NewMatch()
-		if err != nil {
-			log.Println(err)
+			ret, err := json.Marshal(match)
+			match = parser.NewMatch()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			match.Start = t
+			log.Println(string(ret))
 			return
 		}
-		match.Start = t
-		log.Println(string(ret))
-		return
-	}
 
-	// Process bold messages
-	if strings.HasPrefix(m.Content, "**") {
-		line := strings.Trim(m.Content, "*")
-		log.Println("parsing:", line)
-		parser.ParseLine(match, line, t)
-		return
+		// Process bold messages
+		if strings.HasPrefix(line, "**") {
+			line := strings.Trim(line, "*")
+			log.Println("parsing:", line)
+			parser.ParseLine(match, line, t)
+			return
+		}
 	}
 
 	// Process embed messages
