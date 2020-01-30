@@ -1,0 +1,35 @@
+<table class="table table-striped table-hover" id="matches">
+    <thead class="table-secondary">
+        <tr>
+        <td>ID</td>
+        <td>When</td>
+        <td>Game length</td>
+        <td>Winner</td>
+        <td>Difficulty</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr />
+    </tbody>
+</table>
+<script>
+$('#matches').ready(function() {
+    $.getJSON( "/api/match/history/")
+        .done(function(data) {
+            let tbl = $('#matches > tbody');
+            $.each(data, function(index, match) {
+                addRecentMatchesEntry(tbl, match);
+            });
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            let tbl = $('#matches > tbody');
+            tbl.append($("<tr>")
+                .append($("<td>")
+                    .append("Fetching recent matches failed: " + err)
+                    .attr("colSpan", "5")
+                ));
+        });
+});
+</script>
