@@ -66,7 +66,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 			continue
 		}
 		// Process map restart
-		if strings.Contains(line, "Map is restarting!") {
+		if strings.Contains(line, "Map is restarting") {
 			log.Println("GAME RESTART")
 			parser.FixPlayers(match)
 
@@ -86,6 +86,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 
 		// Process bold messages
 		if strings.HasPrefix(line, "**") {
+			line = strings.ReplaceAll(line, "\\", "")
 			line := strings.Trim(line, "*")
 			log.Println("parsing:", line)
 			parser.ParseLine(match, line, t)
@@ -96,6 +97,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 	// Process embed messages
 	for _, e := range m.Embeds {
 		line := e.Description
+		line = strings.ReplaceAll(line, "\\", "")
 		log.Println("parsing:", line)
 		parser.ParseLineEmbed(match, line, t)
 	}

@@ -2,7 +2,6 @@ package stats
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -25,10 +24,6 @@ type EmptyModel struct {
 type Player struct {
 	Name    string  `gorm:"PRIMARY_KEY"`
 	History []Match `gorm:"many2many:player_match;" json:"-"`
-}
-
-func (p *Player) FixName() {
-	p.Name = strings.Replace(p.Name, "\\", "", -1)
 }
 
 type MVPplayer struct {
