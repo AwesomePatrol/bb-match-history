@@ -21,7 +21,7 @@ func TestInsertMatch(t *testing.T) {
 		t.Log(err)
 		t.FailNow()
 	}
-	returndata, err := QueryMatch(nil)
+	returndata, err := QueryMatchShort(1)
 	if err != nil {
 		t.Log(err)
 		t.FailNow()

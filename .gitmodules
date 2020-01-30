@@ -1,0 +1,3 @@
+[submodule "assets/themes/minimal-bootstrap-hugo-theme"]
+	path = assets/themes/minimal-bootstrap-hugo-theme
+	url = https://github.com/zwbetz-gh/minimal-bootstrap-hugo-theme.git
