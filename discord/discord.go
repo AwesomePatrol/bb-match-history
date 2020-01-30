@@ -54,12 +54,17 @@ func sendReplyInDM(s *discordgo.Session, recipientID string, content string) {
 		log.Println(err)
 	}
 }
-
 func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
+	t, _ := discordgo.SnowflakeTimestamp(m.ID)
+	_processMatchMessages(s, m, t)
+}
+
+func _processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate, t time.Time) {
 	// Process map restart
 	if m.Content == `**\*\*\* Map is restarting! \*\*\***` {
 		parser.FixPlayers(match)
 		stats.InsertMatch(match)
+		match.End = t
 
 		ret, err := json.Marshal(match)
 		match = parser.NewMatch()
@@ -67,10 +72,8 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 			log.Println(err)
 			return
 		}
-		_, err = s.ChannelMessageSend(m.ChannelID, string(ret))
-		if err != nil {
-			log.Println(err)
-		}
+		match.Start = t
+		log.Println(err)
 		return
 	}
 
@@ -78,7 +81,7 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(m.Content, "**") {
 		line := strings.Trim(m.Content, "*")
 		log.Println("parsing:", line)
-		parser.ParseLine(match, line)
+		parser.ParseLine(match, line, t)
 		return
 	}
 
@@ -86,7 +89,7 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	for _, e := range m.Embeds {
 		line := e.Description
 		log.Println("parsing:", line)
-		parser.ParseLineEmbed(match, line)
+		parser.ParseLineEmbed(match, line, t)
 	}
 }
 

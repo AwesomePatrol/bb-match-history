@@ -45,7 +45,7 @@ func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 			ongoing = false
 			break
 		}
-		ParseLine(match, line)
+		ParseLine(match, line, time.Now())
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func FixPlayers(match *stats.Match) {
 	match.South.Players = makeUnique(match.South.Players)
 }
 
-func ParseLineEmbed(match *stats.Match, line string) {
+func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 	switch {
 	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
 		var difficulty string
@@ -90,7 +90,7 @@ func ParseLineEmbed(match *stats.Match, line string) {
 			log.Println("unknown difficulty:", difficulty)
 		}
 		match.Difficulty = diffConst
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line, Timestamp: t})
 	case strings.HasPrefix(line, "Server has"):
 	case strings.HasSuffix(line, "has won!"):
 		switch line {
@@ -101,7 +101,7 @@ func ParseLineEmbed(match *stats.Match, line string) {
 		default:
 			log.Println("err: unknown team:", line)
 		}
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.WinnerAnnounce, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.WinnerAnnounce, Payload: line, Timestamp: t})
 	case strings.HasPrefix(line, "Time - "):
 		var hours, minutes int
 		_, err := fmt.Sscanf(line, "Time - %d hours and %d minutes", &hours, &minutes)
@@ -109,15 +109,16 @@ func ParseLineEmbed(match *stats.Match, line string) {
 			break
 		}
 		match.Length = time.Hour*time.Duration(hours) + time.Minute*time.Duration(minutes)
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.GameTimeAnnounce, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.GameTimeAnnounce, Payload: line, Timestamp: t})
 	}
 }
 
-func ParseLine(match *stats.Match, line string) {
+func ParseLine(match *stats.Match, line string, t time.Time) {
 	switch {
 	case strings.HasSuffix(line, "has joined the game"):
 		event := new(stats.Event)
 		event.EventType = stats.JoinGame
+		event.Timestamp = t
 		_, err := fmt.Sscanf(line, "%s has joined the game", &event.Payload)
 		if err != nil {
 			break
@@ -126,6 +127,7 @@ func ParseLine(match *stats.Match, line string) {
 	case strings.HasSuffix(line, "has left the game"):
 		event := new(stats.Event)
 		event.EventType = stats.LeaveGame
+		event.Timestamp = t
 		_, err := fmt.Sscanf(line, "%s has left the game", &event.Payload)
 		if err != nil {
 			break
@@ -139,7 +141,7 @@ func ParseLine(match *stats.Match, line string) {
 		}
 		match.Players = append(match.Players, player)
 		match.North.Players = append(match.North.Players, player)
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	case strings.HasSuffix(line, "has joined team south!"):
 		player := new(stats.Player)
 		_, err := fmt.Sscanf(line, "%s has joined team south!", &player.Name)
@@ -148,8 +150,8 @@ func ParseLine(match *stats.Match, line string) {
 		}
 		match.Players = append(match.Players, player)
 		match.South.Players = append(match.South.Players, player)
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	case strings.Contains(line, " was killed "):
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.PlayerDeath, Payload: line})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.PlayerDeath, Payload: line, Timestamp: t})
 	}
 }

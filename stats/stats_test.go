@@ -12,6 +12,7 @@ func TestInsertMatch(t *testing.T) {
 		t.Log(err)
 		t.FailNow()
 	}
+	testdata.North.IsNorth = true
 	OpenDB(":memory:")
 	//OpenDB("test.db")
 	defer CloseDB()
