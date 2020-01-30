@@ -1,0 +1,44 @@
+<form id="search">
+  <input id="searchfield" type="text" placeholder="Player..." name="search">
+  <button type="submit"><i class="fa fa-search"></i></button>
+</form>
+<table class="table table-striped table-hover" id="matches">
+    <thead class="table-secondary">
+        <tr>
+        <td>ID</td>
+        <td>When</td>
+        <td>Game length</td>
+        <td>Winner</td>
+        <td>Difficulty</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr />
+    </tbody>
+</table>
+<script>
+$('#search').submit(function(event) {
+    event.preventDefault();
+    let tbl = $('#matches > tbody');
+    tbl.empty();
+    tbl.append($("<tr>"));
+    let name = $("#searchfield").val();
+    console.log(name);
+    $.getJSON( "/api/player/"+name+"/history/")
+        .done(function(data) {
+            $.each(data, function(index, match) {
+                addRecentMatchesEntry(tbl, match);
+            });
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            let tbl = $('#matches > tbody');
+            tbl.append($("<tr>")
+                .append($("<td>")
+                    .append("Fetching player's matches failed: " + err)
+                    .attr("colSpan", "5")
+                ));
+        });
+});
+</script>
