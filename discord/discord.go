@@ -20,6 +20,8 @@ var (
 )
 var validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
 
+const comfylatronID = "493392617258876948"
+
 func init() {
 	match = parser.NewMatch()
 }
@@ -168,7 +170,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Process only added channels
-	if _, ok := validChannels[m.ChannelID]; ok {
+	if _, ok := validChannels[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
 		processMatchMessages(s, m.Message)
 	}
