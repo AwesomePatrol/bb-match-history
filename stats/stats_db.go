@@ -30,12 +30,7 @@ func InsertMatch(match *Match) error {
 	return db.Create(match).Error
 }
 
-func QueryMatchShort(id int) (*Match, error) {
-	match := new(Match)
-	return match, db.First(match, id).Error
-}
-
-func QueryMatchLong(id int) (match *Match, err error) {
+func queryMatchShort(id int) (match *Match, err error) {
 	match = new(Match)
 	matchDB := db.Preload("Players").First(match, id)
 	if matchDB.Error != nil {
@@ -50,6 +45,18 @@ func QueryMatchLong(id int) (match *Match, err error) {
 
 	match.South = new(Team)
 	err = matchDB.Where("is_north = ?", false).Related(&match.South).Error
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func QueryMatchShort(id int) (*Match, error) {
+	return queryMatchShort(id)
+}
+
+func QueryMatchLong(id int) (match *Match, err error) {
+	match, err = queryMatchShort(id)
 	if err != nil {
 		return nil, err
 	}

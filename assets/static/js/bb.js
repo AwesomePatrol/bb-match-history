@@ -8,6 +8,55 @@ var diff2str = [
   "Insane"
   ];
 
+function fillMatchDetailsRows(tbl, details) {
+    let n = Math.max(details.South.Players.length, details.North.Players.length);
+    for (let i=0; i<n; i++) {
+        let north = $("<td>");
+        if (i < details.North.Players.length) {
+            north.append(details.North.Players[i].Name);
+        }
+        let south = $("<td>");
+        if (i < details.South.Players.length) {
+            south.append(details.South.Players[i].Name);
+        }
+        tbl.append($("<tr>")
+            .append(north)
+            .append(south)
+        );
+    }
+}
+
+function getMatchDetails(event) {
+    let id = event.data.ID;
+    if (id == 0) {
+        return;
+    }
+    let tr = $("<tr>")
+        .attr("colSpan", "5");
+    $(this).after(tr);
+    $.getJSON( "/api/match/short/" + id)
+        .done(function(data) {
+            let tbl = $("<table>")
+                .append($("<thead>").append($("<tr>")
+                    .addClass("table-secondary")
+                    .append($("<td>").append("North Team"))
+                    .append($("<td>").append("South Team"))
+                ));
+            fillMatchDetailsRows(tbl, data);
+            tr.append($("<td>")
+                .append(tbl)
+                .attr("colSpan", "5")
+                .attr("align", "center")
+            );
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            tr.append($("<td>")
+                .append("Fetching recent match details failed: " + err));
+        });
+}
+
 function addRecentMatchesEntry(tbl, match) {
     let ago = moment(match.Start);
     let winner = "South";
@@ -20,7 +69,8 @@ function addRecentMatchesEntry(tbl, match) {
       .append($("<td>").append(ago.fromNow()))
       .append($("<td>").append(match.Length))
       .append($("<td>").append(winner))
-      .append($("<td>").append(diffStr));
+      .append($("<td>").append(diffStr))
+      .one("click", {ID: match.ID}, getMatchDetails);
     if (!(typeof match.IsWinner === 'undefined')) {
         if (match.IsWinner) {
             row.addClass("table-success")
