@@ -73,7 +73,7 @@ func QueryMatchLong(id int) (match *Match, err error) {
 func QueryMatchAll() (matches []Match, err error) {
 	// TODO pagination?
 	matches = make([]Match, 0, 128)
-	err = db.Limit(128).Order("id desc").Find(&matches).Error
+	err = db.Limit(128).Order("start desc").Find(&matches).Error
 	return
 }
 
@@ -88,7 +88,9 @@ func isInWinningTeam(name string, team []*Player) bool {
 
 func QueryPlayerMatches(name string) ([]Match, error) {
 	player := Player{Name: name}
-	err := db.Preload("History").First(&player).Error
+	err := db.Preload("History", func(db *gorm.DB) *gorm.DB {
+		return db.Order("matches.start DESC")
+	}).First(&player).Error
 	if err != nil {
 		return nil, err
 	}
