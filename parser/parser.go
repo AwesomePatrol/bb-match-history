@@ -152,6 +152,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		if err != nil {
 			break
 		}
+		player.FixName()
 		match.Players = append(match.Players, player)
 		match.North.Players = append(match.North.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
@@ -161,6 +162,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		if err != nil {
 			break
 		}
+		player.FixName()
 		match.Players = append(match.Players, player)
 		match.South.Players = append(match.South.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})

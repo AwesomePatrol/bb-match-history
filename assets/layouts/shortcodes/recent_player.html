@@ -22,7 +22,7 @@ function getPlayerMatchHistory() {
     tbl.empty();
     tbl.append($("<tr>"));
     let name = $("#searchfield").val();
-    $.getJSON( "/api/player/"+name+"/history/")
+    $.getJSON( "/api/player/"+encodeURIComponent(name)+"/history/")
         .done(function(data) {
             $.each(data, function(index, match) {
                 addRecentMatchesEntry(tbl, match);
