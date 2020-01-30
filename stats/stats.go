@@ -93,4 +93,5 @@ type Match struct {
 	NorthWon     bool
 	Difficulty   `sql:"type:difficulty"`
 	Timeline     []*Event `gorm:"foreignkey:MatchID" json:",omitempty"`
+	IsWinner     *bool    `json:",omitempty"`
 }
