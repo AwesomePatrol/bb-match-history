@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/awesomepatrol/bb-match-history/parser"
 	"github.com/awesomepatrol/bb-match-history/stats"
@@ -89,6 +90,10 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
+	log.Println("done")
+}
+
 func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == `!test` {
 		sendReplyInDM(s, m.Author.ID, "ok")
@@ -96,6 +101,21 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == `!addChannel` {
 		validChannels[m.ChannelID] = nil
 		sendReplyInDM(s, m.Author.ID, "channel "+m.ChannelID+" added")
+	}
+	if strings.HasPrefix(m.Content, "!parseHistory") {
+		var str string
+		_, err := fmt.Sscanf(m.Content, "!parseHistory %s", &str)
+		if err != nil {
+			log.Println("parseHistory command failed: scan:", err)
+			return
+		}
+		t, err := time.Parse("2006-01-02", str)
+		if err != nil {
+			log.Println("parseHistory command failed: timestamp:", err)
+			return
+		}
+		sendReplyInDM(s, m.Author.ID, "parsing history from "+m.ChannelID+" started")
+		go parseHistory(s, m.ChannelID, t)
 	}
 }
 
