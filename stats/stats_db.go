@@ -32,6 +32,11 @@ func InsertMatch(match *Match) error {
 		log.Println("skipping empty match:", match)
 		return nil
 	}
+	var n int
+	db.Where("start = ?", match.Start).Find(new(Match)).Count(&n)
+	if n > 0 {
+		return fmt.Errorf("already in db")
+	}
 	return db.Create(match).Error
 }
 

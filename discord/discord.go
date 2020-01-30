@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -70,15 +69,18 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 		if strings.Contains(line, "Map is restarting!") {
 			log.Println("GAME RESTART")
 			parser.FixPlayers(match)
-			stats.InsertMatch(match)
-			match.End = t
 
-			ret, err := json.Marshal(match)
-			if err != nil {
-				log.Println(err)
-				return true
+			// Server stops after match restart
+			if match.End.IsZero() || match.Start.Before(match.End) {
+				match.End = t
 			}
-			log.Println(string(ret))
+
+			err := stats.InsertMatch(match)
+			if err != nil {
+				log.Println("will be skipped:", err)
+			}
+
+			log.Println(match)
 			return true
 		}
 
@@ -142,7 +144,9 @@ func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t)
 	historyMatch := parser.NewMatch()
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
-		processMatchMessages(s, lines[i], historyMatch)
+		if processMatchMessages(s, lines[i], historyMatch) {
+			historyMatch = parser.NewMatch()
+		}
 	}
 }
 

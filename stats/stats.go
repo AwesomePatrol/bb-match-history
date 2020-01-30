@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -100,4 +101,8 @@ type Match struct {
 	Difficulty   `sql:"type:difficulty"`
 	Timeline     []*Event `gorm:"foreignkey:MatchID" json:",omitempty"`
 	IsWinner     *bool    `json:",omitempty"`
+}
+
+func (m *Match) String() string {
+	return fmt.Sprintf("start: %v end: %v difficulty: %d players: %d", m.Start, m.End, m.Difficulty, len(m.Players))
 }
