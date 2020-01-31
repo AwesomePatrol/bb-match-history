@@ -1,3 +1,4 @@
+<div id="diffBreak" style="display: none"></div>
 <table class="table table-striped table-hover" id="matches">
     <thead class="table-secondary">
         <tr>
@@ -20,6 +21,8 @@ $('#matches').ready(function() {
             $.each(data, function(index, match) {
                 addRecentMatchesEntry(tbl, match);
             });
+
+            showDifficultyBreakdown();
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;

@@ -4,6 +4,7 @@
 </form>
 </br>
 <div id="winrate" style="display: none"></div>
+<div id="diffBreak" style="display: none"></div>
 <table class="table table-striped table-hover" id="matches">
     <thead class="table-secondary">
         <tr>
@@ -41,6 +42,7 @@ function getPlayerMatchHistory() {
             });
 
             showStats();
+            showDifficultyBreakdown();
 
             let main = window.location.href;
             main = main.substring(0, main.lastIndexOf("/") + 1);

@@ -8,6 +8,15 @@ var diff2str = [
   "Insane"
   ];
 
+function showDifficultyBreakdown() {
+    let df = $("#diffBreak");
+    df.empty();
+    $.each(diff2str, function(i, val) {
+        df.append($("<h5>").append(val + ": " + $("#matches td:contains(" + val + ")").length));
+    });
+    df.show();
+}
+
 function fillMatchDetailsRows(tbl, details) {
     let n = Math.max(details.South.Players.length, details.North.Players.length);
     for (let i=0; i<n; i++) {
