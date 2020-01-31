@@ -61,8 +61,13 @@ func queryMatchShort(id int) (match *Match, err error) {
 	return
 }
 
-func QueryMatchShort(id int) (*Match, error) {
-	return queryMatchShort(id)
+func QueryMatchShort(id int) (m *Match, err error) {
+	m, err = queryMatchShort(id)
+	if err != nil {
+		return nil, err
+	}
+	m.Players = nil
+	return
 }
 
 func QueryMatchLong(id int) (match *Match, err error) {
