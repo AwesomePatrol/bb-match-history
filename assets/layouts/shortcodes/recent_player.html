@@ -52,6 +52,7 @@ function getPlayerMatchHistory() {
             var err = textStatus + ", " + error;
             console.log( "Request Failed: " + err );
             $("#winrate").empty();
+            $("#diffBreak").empty();
             let tbl = $('#matches > tbody');
             tbl.append($("<tr>")
                 .append($("<td>")
