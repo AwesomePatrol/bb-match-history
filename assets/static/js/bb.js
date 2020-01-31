@@ -69,6 +69,18 @@ function fillShortMatchDetailsRows(tr, details) {
     );
 }
 
+function getNiceTimeFromat(since) {
+    let seconds = "" + since.seconds();
+    if (seconds < 10) {
+        seconds = "0" + seconds;
+    }
+    let minutes = "" + (60*(since.hours())+since.minutes());
+    if (minutes < 10) {
+        minutes = "0" + minutes;
+    }
+    return (minutes + ":" + seconds);
+}
+
 function fillLongMatchDetailsRows(tr, details) {
     let tbl = $("<table>")
         .append($("<thead>").append($("<tr>")
@@ -86,7 +98,7 @@ function fillLongMatchDetailsRows(tr, details) {
         }
         let since = moment.duration(moment(data.Timestamp) - ref, 'ms');
         tbl.append($("<tr>")
-            .append($("<td>").append((60*(since.hours())+since.minutes()) + ":" + since.seconds()))
+            .append($("<td>").append(getNiceTimeFromat(since)))
             //.append($("<td>").append(data.EventType))
             .append($("<td>").append(data.Payload))
         );
