@@ -62,8 +62,10 @@ function getMatchDetails(event) {
         return;
     }
     let tr = $("<tr>")
-        .attr("colSpan", "5");
+        .attr("colSpan", "5")
+        .hide();
     $(this).after(tr);
+    tr.fadeIn('fast');
     $.getJSON( "/api/match/short/" + id)
         .done(function(data) {
             let tbl = $("<table>")
@@ -85,6 +87,12 @@ function getMatchDetails(event) {
             tr.append($("<td>")
                 .append("Fetching recent match details failed: " + err));
         });
+    $(this).one("click", {ID: id}, function(event) {
+        tr.fadeOut('fast', function() {
+            tr.remove();
+        });
+        $(this).one("click", {ID: event.data.ID}, getMatchDetails);
+    });
 }
 
 function addRecentMatchesEntry(tbl, match) {
