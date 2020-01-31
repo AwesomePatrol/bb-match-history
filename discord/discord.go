@@ -71,7 +71,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 			parser.FixPlayers(match)
 
 			// Server stops after match restart
-			if match.End.IsZero() || match.Start.Before(match.End) {
+			if match.End.IsZero() || match.Start.After(match.End) {
 				match.End = t
 			}
 
