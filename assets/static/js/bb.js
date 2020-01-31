@@ -32,7 +32,14 @@ function showDifficultyBreakdown() {
     df.show();
 }
 
-function fillMatchDetailsRows(tbl, details) {
+function fillShortMatchDetailsRows(tr, details) {
+    let tbl = $("<table>")
+        .append($("<thead>").append($("<tr>")
+            .addClass("table-secondary")
+            .append($("<td>").append("North Team [" + details.North.Players.length + "]"))
+            .append($("<td>").append("South Team [" + details.South.Players.length + "]"))
+        ));
+
     let n = Math.max(details.South.Players.length, details.North.Players.length);
     for (let i=0; i<n; i++) {
         let north = $("<td>");
@@ -54,6 +61,42 @@ function fillMatchDetailsRows(tbl, details) {
             .append(south)
         );
     }
+    
+    tr.append($("<td>")
+        .append($("<small>").append(tbl))
+        .attr("colSpan", "5")
+        .attr("align", "center")
+    );
+}
+
+function fillLongMatchDetailsRows(tr, details) {
+    let tbl = $("<table>")
+        .append($("<thead>").append($("<tr>")
+            .addClass("table-secondary")
+            .append($("<td>").append("Time"))
+            //.append($("<td>").append("Event"))
+            .append($("<td>").append("Info"))
+        ));
+    
+    let ref = moment(details.Start);
+    $.each(details.Timeline, function(index, data) {
+        // Ignore some events for now.
+        if (data.EventType < 4) {
+            return;
+        }
+        let since = moment.duration(moment(data.Timestamp) - ref, 'ms');
+        tbl.append($("<tr>")
+            .append($("<td>").append((60*(since.hours())+since.minutes()) + ":" + since.seconds()))
+            //.append($("<td>").append(data.EventType))
+            .append($("<td>").append(data.Payload))
+        );
+    })
+    
+    tr.append($("<td>")
+        .append($("<small>").append(tbl))
+        .attr("colSpan", "5")
+        .attr("align", "center")
+    );
 }
 
 function getMatchDetails(event) {
@@ -66,20 +109,18 @@ function getMatchDetails(event) {
         .hide();
     $(this).after(tr);
     tr.fadeIn('fast');
-    $.getJSON( "/api/match/short/" + id)
+    let endpoint = "/api/match/short/";
+    let isLong = $("#det-long").is(':checked');
+    if (isLong) {
+        endpoint = "/api/match/long/";
+    }
+    $.getJSON(endpoint + id)
         .done(function(data) {
-            let tbl = $("<table>")
-                .append($("<thead>").append($("<tr>")
-                    .addClass("table-secondary")
-                    .append($("<td>").append("North Team [" + data.North.Players.length + "]"))
-                    .append($("<td>").append("South Team [" + data.South.Players.length + "]"))
-                ));
-            fillMatchDetailsRows(tbl, data);
-            tr.append($("<td>")
-                .append($("<small>").append(tbl))
-                .attr("colSpan", "5")
-                .attr("align", "center")
-            );
+            if (isLong) {
+                fillLongMatchDetailsRows(tr, data);
+            } else {
+                fillShortMatchDetailsRows(tr, data);
+            }
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
