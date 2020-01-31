@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,12 +27,16 @@ func main() {
 	stats.OpenDB(DB)
 	defer stats.CloseDB()
 
-	discord.OpenBot(token)
-	defer discord.CloseBot()
+	if token == "" {
+		log.Println("run without discord bot")
+	} else {
+		discord.OpenBot(token)
+		defer discord.CloseBot()
+	}
 
 	server.OpenHTTP()
 
-	fmt.Println("Bot is now running. Press CTRL-C to exit.")
+	log.Println("Bot is now running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
