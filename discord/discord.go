@@ -104,7 +104,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 	return false
 }
 
-func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines []*discordgo.Message) {
+func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time, current bool) (lines []*discordgo.Message) {
 	//TODO: filter by Author.ID
 	ch, err := s.Channel(chanID)
 	if err != nil {
@@ -135,6 +135,9 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines
 				continue
 			}
 			if strings.HasPrefix(msg.Content, "**") || len(msg.Embeds) > 0 {
+				if current && strings.Contains(msg.Content, "Map is restarting") {
+					return
+				}
 				lines = append(lines, msg)
 			}
 		}
@@ -143,11 +146,21 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time) (lines
 }
 
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
-	lines := getRelevantHistory(s, chanID, t)
+	lines := getRelevantHistory(s, chanID, t, false)
 	historyMatch := parser.NewMatch()
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
 		if processMatchMessages(s, lines[i], historyMatch) {
 			historyMatch = parser.NewMatch()
+		}
+	}
+}
+
+func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
+	lines := getRelevantHistory(s, chanID, t, true)
+	for i := len(lines) - 1; i >= 0; i-- { // switch order
+		if processMatchMessages(s, lines[i], currentMatch) {
+			log.Println("shouldn't have ended")
+			currentMatch = parser.NewMatch()
 		}
 	}
 }
@@ -174,6 +187,21 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		sendReplyInDM(s, m.Author.ID, "parsing history from "+chanID+" started")
 		go parseHistory(s, chanID, t)
+	}
+	if strings.HasPrefix(m.Content, "!parseCurrent") {
+		var str, chanID string
+		_, err := fmt.Sscanf(m.Content, "!parseCurrent %s %s", &str, &chanID)
+		if err != nil {
+			log.Println("parseCurrent command failed: scan:", err)
+			return
+		}
+		t, err := time.Parse("2006-01-02", str)
+		if err != nil {
+			log.Println("parseCurrent command failed: timestamp:", err)
+			return
+		}
+		sendReplyInDM(s, m.Author.ID, "parsing current match from "+chanID+" started")
+		go parseCurrent(s, chanID, t)
 	}
 }
 
