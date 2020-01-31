@@ -34,6 +34,7 @@ function showDifficultyBreakdown() {
 
 function fillShortMatchDetailsRows(tr, details) {
     let tbl = $("<table>")
+        .addClass("table-sm")
         .append($("<thead>").append($("<tr>")
             .addClass("table-secondary")
             .append($("<td>").append("North Team [" + details.North.Players.length + "]"))
@@ -83,6 +84,7 @@ function getNiceTimeFromat(since) {
 
 function fillLongMatchDetailsRows(tr, details) {
     let tbl = $("<table>")
+        .addClass("table-sm")
         .append($("<thead>").append($("<tr>")
             .addClass("table-secondary")
             .append($("<td>").append("Time"))
