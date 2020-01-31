@@ -55,12 +55,12 @@ func sendReplyInDM(s *discordgo.Session, recipientID string, content string) {
 		log.Println(err)
 	}
 }
-func processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match) bool {
+func processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match, skip bool) bool {
 	t, _ := discordgo.SnowflakeTimestamp(m.ID)
-	return _processMatchMessages(s, m, match, t)
+	return _processMatchMessages(s, m, match, t, skip)
 }
 
-func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match, t time.Time) bool {
+func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match, t time.Time, skip bool) bool {
 	for _, line := range strings.Split(m.Content, "\n") {
 		if len(line) < 4 {
 			continue
@@ -75,12 +75,16 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 				match.End = t
 			}
 
+			log.Println(match)
+
+			if skip {
+				log.Println("do not insert a partial match")
+				return true
+			}
 			err := stats.InsertMatch(match)
 			if err != nil {
 				log.Println("will be skipped:", err)
 			}
-
-			log.Println(match)
 			return true
 		}
 
@@ -148,8 +152,10 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time, curren
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, false)
 	historyMatch := parser.NewMatch()
+	skip := true
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
-		if processMatchMessages(s, lines[i], historyMatch) {
+		if processMatchMessages(s, lines[i], historyMatch, skip) {
+			skip = false
 			historyMatch = parser.NewMatch()
 		}
 	}
@@ -158,7 +164,7 @@ func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, true)
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
-		if processMatchMessages(s, lines[i], currentMatch) {
+		if processMatchMessages(s, lines[i], currentMatch, false) {
 			log.Println("shouldn't have ended")
 			currentMatch = parser.NewMatch()
 		}
@@ -214,7 +220,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Process only added channels
 	if _, ok := validChannels[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
-		if processMatchMessages(s, m.Message, currentMatch) {
+		if processMatchMessages(s, m.Message, currentMatch, false) {
 			currentMatch = parser.NewMatch()
 		}
 	}
