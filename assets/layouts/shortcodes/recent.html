@@ -14,7 +14,7 @@
 </table>
 <script>
 $('#matches').ready(function() {
-    $.getJSON( "/api/match/history/")
+    $.getJSON( "/api/match/history")
         .done(function(data) {
             let tbl = $('#matches > tbody');
             $.each(data, function(index, match) {

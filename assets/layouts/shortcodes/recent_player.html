@@ -2,6 +2,7 @@
   <input id="searchfield" type="text" placeholder="Player..." name="name">
   <button type="submit"><i class="fa fa-search"></i></button>
 </form>
+</br>
 <div id="winrate" style="display: none"></div>
 <table class="table table-striped table-hover" id="matches">
     <thead class="table-secondary">
@@ -33,7 +34,7 @@ function getPlayerMatchHistory() {
     tbl.empty();
     tbl.append($("<tr>"));
     let name = $("#searchfield").val();
-    $.getJSON( "/api/player/"+encodeURIComponent(name)+"/history/")
+    $.getJSON( "/api/player/"+encodeURIComponent(name)+"/history")
         .done(function(data) {
             $.each(data, function(index, match) {
                 addRecentMatchesEntry(tbl, match);
