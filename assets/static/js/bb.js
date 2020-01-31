@@ -11,9 +11,24 @@ var diff2str = [
 function showDifficultyBreakdown() {
     let df = $("#diffBreak");
     df.empty();
+    let tbl = $("<table>")
+        .addClass("table")
+        .addClass("table-hover")
+        .addClass("table-striped");
+    let th = $("<tr>");
     $.each(diff2str, function(i, val) {
-        df.append($("<h5>").append(val + ": " + $("#matches td:contains(" + val + ")").length));
+        th.append($("<td>").append(val));
     });
+    tbl.append($("<thead>")
+        .append(th)
+        .addClass("table-secondary")
+    );
+    let tr = $("<tr>");
+    $.each(diff2str, function(i, val) {
+        tr.append($("<td>").append($("#matches td:contains(" + val + ")").length));
+    });
+    tbl.append($("<tbody>").append(tr));
+    df.append(tbl);
     df.show();
 }
 
