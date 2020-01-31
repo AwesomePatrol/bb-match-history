@@ -44,7 +44,7 @@ function getMatchDetails(event) {
                 ));
             fillMatchDetailsRows(tbl, data);
             tr.append($("<td>")
-                .append(tbl)
+                .append($("<small>").append(tbl))
                 .attr("colSpan", "5")
                 .attr("align", "center")
             );
