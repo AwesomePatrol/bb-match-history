@@ -41,7 +41,7 @@ type Team struct {
 	MatchID int64        `json:"-"`
 }
 
-type EventType int
+type EventType int64
 
 const (
 	GameStart EventType = iota
@@ -55,6 +55,15 @@ const (
 	WinnerAnnounce
 	GameTimeAnnounce
 )
+
+func (p *EventType) Scan(value interface{}) error {
+	*p = EventType(value.(int64))
+	return nil
+}
+
+func (p EventType) Value() (string, error) {
+	return string(p), nil
+}
 
 type Event struct {
 	EmptyModel
