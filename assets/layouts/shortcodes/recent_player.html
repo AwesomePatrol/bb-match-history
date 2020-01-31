@@ -2,6 +2,7 @@
   <input id="searchfield" type="text" placeholder="Player..." name="name">
   <button type="submit"><i class="fa fa-search"></i></button>
 </form>
+<div id="winrate" style="display: none"></div>
 <table class="table table-striped table-hover" id="matches">
     <thead class="table-secondary">
         <tr>
@@ -17,6 +18,16 @@
     </tbody>
 </table>
 <script>
+
+function showStats() {
+    let wins = $(".table-success").length;
+    let losses = $(".table-danger").length;
+    $("#winrate")
+        .empty()
+        .append($("<h5>").append("Winrate: " + Math.round(wins/(wins+losses)*100) + "%" )
+            .append(" " + wins + "W" + " " + losses + "L"))
+        .show();
+}
 function getPlayerMatchHistory() {
     let tbl = $('#matches > tbody');
     tbl.empty();
@@ -27,6 +38,9 @@ function getPlayerMatchHistory() {
             $.each(data, function(index, match) {
                 addRecentMatchesEntry(tbl, match);
             });
+
+            showStats();
+
             let main = window.location.href;
             main = main.substring(0, main.lastIndexOf("/") + 1);
             window.history.pushState({"pageTitle":"Player History: " + name},"", main + "?name=" + name);
@@ -34,6 +48,7 @@ function getPlayerMatchHistory() {
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
             console.log( "Request Failed: " + err );
+            $("#winrate").empty();
             let tbl = $('#matches > tbody');
             tbl.append($("<tr>")
                 .append($("<td>")
