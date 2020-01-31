@@ -15,11 +15,13 @@ import (
 var (
 	token string
 	DB    string
+	addr  string
 )
 
 func init() {
 	flag.StringVar(&token, "t", "", "Bot Token")
 	flag.StringVar(&DB, "db", "", "Path to DB")
+	flag.StringVar(&addr, "addr", ":8080", "Address of HTTP server")
 	flag.Parse()
 }
 
@@ -34,7 +36,7 @@ func main() {
 		defer discord.CloseBot()
 	}
 
-	server.OpenHTTP()
+	server.OpenHTTP(addr)
 
 	log.Println("Bot is now running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)

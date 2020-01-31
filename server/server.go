@@ -10,7 +10,7 @@ import (
 
 var router *gin.Engine
 
-func OpenHTTP() {
+func OpenHTTP(addr string) {
 	router = gin.Default()
 
 	router.Static("/site", "./assets/public")
@@ -61,5 +61,5 @@ func OpenHTTP() {
 		}
 		c.JSON(http.StatusOK, matches)
 	})
-	router.Run(":8080")
+	router.Run(addr)
 }
