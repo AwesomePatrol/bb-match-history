@@ -39,8 +39,8 @@ function getMatchDetails(event) {
             let tbl = $("<table>")
                 .append($("<thead>").append($("<tr>")
                     .addClass("table-secondary")
-                    .append($("<td>").append("North Team"))
-                    .append($("<td>").append("South Team"))
+                    .append($("<td>").append("North Team [" + data.North.Players.length + "]"))
+                    .append($("<td>").append("South Team [" + data.South.Players.length + "]"))
                 ));
             fillMatchDetailsRows(tbl, data);
             tr.append($("<td>")
