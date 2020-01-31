@@ -13,11 +13,17 @@ function fillMatchDetailsRows(tbl, details) {
     for (let i=0; i<n; i++) {
         let north = $("<td>");
         if (i < details.North.Players.length) {
-            north.append(details.North.Players[i].Name);
+            let name = details.North.Players[i].Name;
+            north.append($("<a>")
+                .attr("href", "/site/search/?name=" + encodeURIComponent(name))
+                .append(name));
         }
         let south = $("<td>");
         if (i < details.South.Players.length) {
-            south.append(details.South.Players[i].Name);
+            let name = details.South.Players[i].Name;
+            south.append($("<a>")
+                .attr("href", "/site/search/?name=" + encodeURIComponent(name))
+                .append(name));
         }
         tbl.append($("<tr>")
             .append(north)
