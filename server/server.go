@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/awesomepatrol/bb-match-history/stats"
+
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +15,16 @@ var router *gin.Engine
 func OpenHTTP(addr string) {
 	router = gin.Default()
 
-	router.Static("/site", "./assets/public")
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/recent")
+	})
+	router.GET("/site", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/recent")
+	})
+	router.GET("/site/:x", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/"+c.Param("x"))
+	})
+	router.Use(static.Serve("/", static.LocalFile("assets/public", false)))
 	router.GET("/api/player/:name/history", func(c *gin.Context) {
 		name := c.Param("name")
 		matches, err := stats.QueryPlayerMatches(name)

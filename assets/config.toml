@@ -1,4 +1,4 @@
-baseURL = "http://bb.patrol.neutrino.re/site/"
+baseURL = "http://bb.patrol.neutrino.re/"
 languageCode = "en-us"
 title = "Biter Battles - Match History"
 theme = "minimal-bootstrap-hugo-theme"
