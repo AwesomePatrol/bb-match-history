@@ -90,6 +90,8 @@ function getNiceTimeFromat(since) {
 function fillLongMatchDetailsRows(details) {
     let tbl = $("<table>")
         .addClass("table-sm")
+        .addClass("table-hover")
+        .addClass("table-striped")
         .append($("<thead>").append($("<tr>")
             .addClass("table-secondary")
             .append($("<td>").append("Time"))
