@@ -25,6 +25,10 @@ func init() {
 	currentMatch = parser.NewMatch()
 }
 
+func GetCurrent() *stats.Match {
+	return currentMatch
+}
+
 func OpenBot(token string) {
 	var err error
 	bot, err = discordgo.New("Bot " + token)

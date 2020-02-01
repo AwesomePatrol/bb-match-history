@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/awesomepatrol/bb-match-history/discord"
 	"github.com/awesomepatrol/bb-match-history/stats"
 
 	"github.com/gin-contrib/static"
@@ -71,6 +72,9 @@ func OpenHTTP(addr string) {
 			return
 		}
 		c.JSON(http.StatusOK, matches)
+	})
+	router.GET("/api/match/current", func(c *gin.Context) {
+		c.JSON(http.StatusOK, discord.GetCurrent())
 	})
 	router.Run(addr)
 }
