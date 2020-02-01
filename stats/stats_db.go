@@ -87,7 +87,7 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
-func isInWinningTeam(name string, team []*Player) bool {
+func isInTeam(name string, team []*Player) bool {
 	for _, p := range team {
 		if p.Name == name {
 			return true
@@ -108,15 +108,23 @@ func QueryPlayerMatches(name string) ([]Match, error) {
 	var falseV = false
 	var trueV = true
 	for i, match := range player.History {
-		var team Team
-		err = db.Preload("Players").Where("is_north = ?", match.NorthWon).Where("match_id = ?", match.ID).First(&team).Error
+		var teamW Team
+		err = db.Preload("Players").Where("is_north = ?", match.NorthWon).Where("match_id = ?", match.ID).First(&teamW).Error
 		if err != nil {
 			return nil, err
 		}
-		if isInWinningTeam(name, team.Players) {
+		var teamL Team
+		err = db.Preload("Players").Where("is_north = ?", !match.NorthWon).Where("match_id = ?", match.ID).First(&teamL).Error
+		if err != nil {
+			return nil, err
+		}
+		switch {
+		case isInTeam(name, teamW.Players):
 			player.History[i].IsWinner = &trueV
-		} else {
+		case isInTeam(name, teamL.Players):
 			player.History[i].IsWinner = &falseV
+		default:
+			player.History[i].IsWinner = nil
 		}
 	}
 	return player.History, nil
