@@ -10,7 +10,12 @@ function checkInTeam(name, team) {
     if (team.Players == null) {
         return false;
     }
-    return (($.grep(team.Players, function(pl) {return name != pl.Name;})).length != 0)
+    for (var i=0, l=team.Players.length; i<l; i++) {
+        if (team.Players[i].Name == name) {
+            return true;
+        }
+    }
+    return false;
 }
 function fillSpec(details) {
     let tbl = $("<table>")
