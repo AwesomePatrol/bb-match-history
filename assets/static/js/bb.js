@@ -40,7 +40,10 @@ function fillShortMatchDetailsRows(details) {
         s_len = details.South.Players.length;
     }
     let tbl = $("<table>")
+        .addClass("table")
         .addClass("table-sm")
+        .addClass("table-hover")
+        .addClass("table-striped")
         .append($("<thead>").append($("<tr>")
             .addClass("table-secondary")
             .append($("<td>").append("North Team [" + n_len + "]"))
