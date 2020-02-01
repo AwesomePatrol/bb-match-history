@@ -144,6 +144,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		if err != nil {
 			break
 		}
+		match.Players = append(match.Players, &stats.Player{Name: event.Payload})
 		match.Timeline = append(match.Timeline, event)
 	case strings.HasSuffix(line, "has left the game"):
 		event := new(stats.Event)
@@ -160,7 +161,6 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		if err != nil {
 			break
 		}
-		match.Players = append(match.Players, player)
 		match.North.Players = append(match.North.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	case strings.HasSuffix(line, "has joined team south!"):
@@ -169,7 +169,6 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		if err != nil {
 			break
 		}
-		match.Players = append(match.Players, player)
 		match.South.Players = append(match.South.Players, player)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	case strings.Contains(line, " was killed "):
