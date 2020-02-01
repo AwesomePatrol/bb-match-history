@@ -63,11 +63,7 @@ function fillShortMatchDetailsRows(tr, details) {
         );
     }
     
-    tr.append($("<td>")
-        .append($("<small>").append(tbl))
-        .attr("colSpan", "5")
-        .attr("align", "center")
-    );
+    return tbl;
 }
 
 function getNiceTimeFromat(since) {
@@ -105,12 +101,7 @@ function fillLongMatchDetailsRows(tr, details) {
             .append($("<td>").append(data.Payload))
         );
     })
-    
-    tr.append($("<td>")
-        .append($("<small>").append(tbl))
-        .attr("colSpan", "5")
-        .attr("align", "center")
-    );
+    return tbl;
 }
 
 function getMatchDetails(event) {
@@ -130,11 +121,17 @@ function getMatchDetails(event) {
     }
     $.getJSON(endpoint + id)
         .done(function(data) {
+            let tbl;
             if (isLong) {
-                fillLongMatchDetailsRows(tr, data);
+                tbl = fillLongMatchDetailsRows(tr, data);
             } else {
-                fillShortMatchDetailsRows(tr, data);
+                tbl = fillShortMatchDetailsRows(tr, data);
             }
+            tr.append($("<td>")
+                .append($("<small>").append(tbl))
+                .attr("colSpan", "5")
+                .attr("align", "center")
+            );
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
