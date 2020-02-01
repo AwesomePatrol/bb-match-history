@@ -1,0 +1,23 @@
+<div style="display: none" id="errorMsg"></div>
+<div style="display: none" id="difficulty"></div>
+</br>
+<div style="width: 50%; float:left;" id="playerList"></div>
+<div style="width: 50%; float:right;" id="eventList"></div>
+<script>
+$('#matches').ready(function() {
+    $.getJSON( "/api/match/current")
+        .done(function(data) {
+            $("#playerList").html(fillShortMatchDetailsRows(data));
+            $("#eventList").html(fillLongMatchDetailsRows(data));
+            $("#difficulty").html("Difficulty: " + diff2str[data.Difficulty]).show();
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            $("#errorMsg")
+                .html("Fetching recent matches failed: " + err)
+                .show();
+        });
+});
+</script>
+

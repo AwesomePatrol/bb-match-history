@@ -32,26 +32,32 @@ function showDifficultyBreakdown() {
     df.show();
 }
 
-function fillShortMatchDetailsRows(tr, details) {
+function fillShortMatchDetailsRows(details) {
+    let n_len = 0;
+    let s_len = 0;
+    if (details.South.Players != null && details.North.Players != null) {
+        n_len = details.North.Players.length;
+        s_len = details.South.Players.length;
+    }
     let tbl = $("<table>")
         .addClass("table-sm")
         .append($("<thead>").append($("<tr>")
             .addClass("table-secondary")
-            .append($("<td>").append("North Team [" + details.North.Players.length + "]"))
-            .append($("<td>").append("South Team [" + details.South.Players.length + "]"))
+            .append($("<td>").append("North Team [" + n_len + "]"))
+            .append($("<td>").append("South Team [" + s_len + "]"))
         ));
 
-    let n = Math.max(details.South.Players.length, details.North.Players.length);
+    let n = Math.max(n_len, s_len);
     for (let i=0; i<n; i++) {
         let north = $("<td>");
-        if (i < details.North.Players.length) {
+        if (i < n_len) {
             let name = details.North.Players[i].Name;
             north.append($("<a>")
                 .attr("href", "/site/search/?name=" + encodeURIComponent(name))
                 .append(name));
         }
         let south = $("<td>");
-        if (i < details.South.Players.length) {
+        if (i < s_len) {
             let name = details.South.Players[i].Name;
             south.append($("<a>")
                 .attr("href", "/site/search/?name=" + encodeURIComponent(name))
@@ -78,7 +84,7 @@ function getNiceTimeFromat(since) {
     return (minutes + ":" + seconds);
 }
 
-function fillLongMatchDetailsRows(tr, details) {
+function fillLongMatchDetailsRows(details) {
     let tbl = $("<table>")
         .addClass("table-sm")
         .append($("<thead>").append($("<tr>")
@@ -123,9 +129,9 @@ function getMatchDetails(event) {
         .done(function(data) {
             let tbl;
             if (isLong) {
-                tbl = fillLongMatchDetailsRows(tr, data);
+                tbl = fillLongMatchDetailsRows(data);
             } else {
-                tbl = fillShortMatchDetailsRows(tr, data);
+                tbl = fillShortMatchDetailsRows(data);
             }
             tr.append($("<td>")
                 .append($("<small>").append(tbl))
