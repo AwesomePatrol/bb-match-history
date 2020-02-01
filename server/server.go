@@ -52,7 +52,7 @@ func OpenHTTP(addr string) {
 		}
 		c.JSON(http.StatusOK, match)
 	})
-	router.GET("/api/match/history/", func(c *gin.Context) {
+	router.GET("/api/match/history", func(c *gin.Context) {
 		matches, err := stats.QueryMatchAll()
 		if err != nil {
 			// FIXME
