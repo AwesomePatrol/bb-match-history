@@ -50,6 +50,7 @@ function fillShortMatchDetailsRows(details) {
             .append($("<td>").append("South Team [" + s_len + "]"))
         ));
 
+    let body = $("<tbody>");
     let n = Math.max(n_len, s_len);
     for (let i=0; i<n; i++) {
         let north = $("<td>");
@@ -66,11 +67,12 @@ function fillShortMatchDetailsRows(details) {
                 .attr("href", "/site/search/?name=" + encodeURIComponent(name))
                 .append(name));
         }
-        tbl.append($("<tr>")
+        body.append($("<tr>")
             .append(north)
             .append(south)
         );
     }
+    tbl.append(body);
     
     return tbl;
 }
@@ -99,6 +101,7 @@ function fillLongMatchDetailsRows(details) {
             .append($("<td>").append("Info"))
         ));
     
+    let body = $("<tbody>");
     let ref = moment(details.Start);
     $.each(details.Timeline, function(index, data) {
         // Ignore some events for now.
@@ -106,12 +109,13 @@ function fillLongMatchDetailsRows(details) {
             return;
         }
         let since = moment.duration(moment(data.Timestamp) - ref, 'ms');
-        tbl.append($("<tr>")
+        body.append($("<tr>")
             .append($("<td>").append(getNiceTimeFromat(since)))
             //.append($("<td>").append(data.EventType))
             .append($("<td>").append(data.Payload))
         );
     })
+    tbl.append(body);
     return tbl;
 }
 

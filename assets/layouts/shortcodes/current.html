@@ -21,16 +21,18 @@ function fillSpec(details) {
             .addClass("table-secondary")
             .append($("<td>").append("Spectator List"))
         ));
-    
+
+    let body = $("<tbody>");
     $.each(details.Players, function(index, data) {
         let name = data.Name;
         if (checkInTeam(name, details.North) || checkInTeam(name, details.South)) {
             return;
         }
-        tbl.append($("<tr>")
+        body.append($("<tr>")
             .append($("<td>").append(name))
         );
-    })
+    });
+    tbl.append(body);
     return tbl;
 }
 $('#matches').ready(function() {
