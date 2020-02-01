@@ -57,14 +57,14 @@ function fillShortMatchDetailsRows(details) {
         if (i < n_len) {
             let name = details.North.Players[i].Name;
             north.append($("<a>")
-                .attr("href", "/site/search/?name=" + encodeURIComponent(name))
+                .attr("href", "/search/?name=" + encodeURIComponent(name))
                 .append(name));
         }
         let south = $("<td>");
         if (i < s_len) {
             let name = details.South.Players[i].Name;
             south.append($("<a>")
-                .attr("href", "/site/search/?name=" + encodeURIComponent(name))
+                .attr("href", "/search/?name=" + encodeURIComponent(name))
                 .append(name));
         }
         body.append($("<tr>")
