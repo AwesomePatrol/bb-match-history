@@ -17,17 +17,21 @@ theme = "minimal-bootstrap-hugo-theme"
 
 [menu]
   [[menu.nav]]
-  name = "Recent matches"
+  name = "Recent"
   url = "/recent"
   weight = 1
   [[menu.nav]]
+  name = "Current"
+  url = "/current"
+  weight = 2
+  [[menu.nav]]
   name = "Search"
   url = "/search"
-  weight = 2
+  weight = 3
   [[menu.nav]]
   name = "About"
   url = "/about"
-  weight = 3
+  weight = 4
 
 [markup]
   defaultMarkdownHandler = "goldmark"
