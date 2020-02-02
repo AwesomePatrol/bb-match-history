@@ -74,7 +74,13 @@ func OpenHTTP(addr string) {
 		c.JSON(http.StatusOK, matches)
 	})
 	router.GET("/api/match/current", func(c *gin.Context) {
-		c.JSON(http.StatusOK, discord.GetCurrent())
+		c.Redirect(http.StatusMovedPermanently, "/api/match/current/casual")
+	})
+	router.GET("/api/match/current/casual", func(c *gin.Context) {
+		c.JSON(http.StatusOK, discord.GetCurrentCasual())
+	})
+	router.GET("/api/match/current/tournament", func(c *gin.Context) {
+		c.JSON(http.StatusOK, discord.GetCurrentTournament())
 	})
 	router.GET("/api/match/mvp", func(c *gin.Context) {
 		defenders, err := stats.QueryGlobalMVP("Defender")

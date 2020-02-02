@@ -13,18 +13,28 @@ import (
 
 const masterID = "213745524279345152"
 
-const casualServer = "671815098427244567"
+const (
+	casualServer     = "493470400336887811"
+	tournamentServer = "632636538605273160"
+)
 
 var (
 	bot           *discordgo.Session
 	validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
-	currentMatch  = map[string]*stats.Match{casualServer: parser.NewMatch()}
+	currentMatch  = map[string]*stats.Match{
+		casualServer:     parser.NewMatch(),
+		tournamentServer: parser.NewMatch(),
+	}
 )
 
 const comfylatronID = "493392617258876948"
 
-func GetCurrent() *stats.Match {
+func GetCurrentCasual() *stats.Match {
 	return currentMatch[casualServer]
+}
+
+func GetCurrentTournament() *stats.Match {
+	return currentMatch[tournamentServer]
 }
 
 func OpenBot(token string) {
@@ -182,6 +192,7 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if m.Content == `!addChannel` {
 		validChannels[m.ChannelID] = nil
+		currentMatch[m.ChannelID] = parser.NewMatch()
 		sendReplyInDM(s, m.Author.ID, "channel "+m.ChannelID+" added")
 	}
 	if strings.HasPrefix(m.Content, "!parseHistory") {
@@ -210,6 +221,9 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			log.Println("parseCurrent command failed: timestamp:", err)
 			return
+		}
+		if _, ok := currentMatch[chanID]; !ok {
+			currentMatch[chanID] = parser.NewMatch()
 		}
 		sendReplyInDM(s, m.Author.ID, "parsing current match from "+chanID+" started")
 		go parseCurrent(s, chanID, t)
