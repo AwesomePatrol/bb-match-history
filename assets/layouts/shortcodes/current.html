@@ -1,5 +1,6 @@
 <div style="display: none" id="errorMsg"></div>
 <div style="display: none" id="difficulty"></div>
+<div style="display: none" id="started"></div>
 </br>
 <div style="width: 50%; float:left;" id="playerList"></div>
 <div style="width: 50%; float:right;" id="eventList"></div>
@@ -47,6 +48,7 @@ $('#matches').ready(function() {
             $("#eventList").html(fillLongMatchDetailsRows(data));
             $("#spectatorList").html(fillSpec(data));
             $("#difficulty").html("Difficulty: " + diff2str[data.Difficulty]).show();
+            $("#started").html("Started: " + moment(data.Start).fromNow()).show();
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
