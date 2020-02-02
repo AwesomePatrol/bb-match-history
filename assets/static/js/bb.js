@@ -126,10 +126,12 @@ function getMVPTable(details) {
         .addClass("table-striped")
         .append($("<thead>")
             .addClass("table-secondary").append($("<tr>")
+            .append($("<td>").append(""))
             .append($("<td>").append("Defenders").attr("colSpan", "3"))
             .append($("<td>").append("Deaths").attr("colSpan", "3"))
             .append($("<td>").append("Builders").attr("colSpan", "3"))
         ).append($("<tr>")
+            .append($("<td>").append("#"))
             .append($("<td>").append("Name"))
             .append($("<td>").append("Count"))
             .append($("<td>").append("Total"))
@@ -148,6 +150,7 @@ function getMVPTable(details) {
         let ded = details.Deaths[i];
         let bui = details.Builders[i];
         body.append($("<tr>")
+            .append($("<td>").append(i+1))
             .append($("<td>").append(def.Name))
             .append($("<td>").append(def.Stat))
             .append($("<td>").append(def.Total))
