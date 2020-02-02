@@ -1,3 +1,14 @@
+<label>
+  Match type:
+  <div id="matchType" class="btn-group btn-group-toggle" data-toggle="buttons">
+  <label class="btn btn-secondary active">
+    <input type="radio" name="options" id="det-casual" autocomplete="off" checked> casual
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="det-tournament" autocomplete="off"> tournament
+  </label>
+  </div>
+</label>
 <div style="display: none" id="errorMsg"></div>
 <div style="display: none" id="difficulty"></div>
 <div style="display: none" id="started"></div>
@@ -41,8 +52,13 @@ function fillSpec(details) {
     tbl.append(body);
     return tbl;
 }
-$('#matches').ready(function() {
-    $.getJSON( "/api/match/current")
+function fetchCurrent() {
+    let endpoint = "/api/match/current/casual"
+    let isTour = $("#det-tournament").is(':checked');
+    if (isTour) {
+        endpoint = "/api/match/current/tournament";
+    }
+    $.getJSON(endpoint)
         .done(function(data) {
             $("#playerList").html(fillShortMatchDetailsRows(data));
             $("#eventList").html(fillLongMatchDetailsRows(data));
@@ -57,6 +73,8 @@ $('#matches').ready(function() {
                 .html("Fetching recent matches failed: " + err)
                 .show();
         });
-});
+}
+$('#matches').ready(fetchCurrent);
+$('#matchType').change(fetchCurrent);
 </script>
 
