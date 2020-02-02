@@ -16,14 +16,15 @@ const masterID = "213745524279345152"
 const (
 	casualServer     = "493470400336887811"
 	tournamentServer = "632636538605273160"
+	testServer       = "671815098427244567"
 )
 
 var (
-	bot           *discordgo.Session
-	validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
-	currentMatch  = map[string]*stats.Match{
+	bot          *discordgo.Session
+	currentMatch = map[string]*stats.Match{
 		casualServer:     parser.NewMatch(),
 		tournamentServer: parser.NewMatch(),
+		testServer:       parser.NewMatch(),
 	}
 )
 
@@ -191,7 +192,6 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		sendReplyInDM(s, m.Author.ID, "ok")
 	}
 	if m.Content == `!addChannel` {
-		validChannels[m.ChannelID] = nil
 		currentMatch[m.ChannelID] = parser.NewMatch()
 		sendReplyInDM(s, m.Author.ID, "channel "+m.ChannelID+" added")
 	}
@@ -237,7 +237,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Process only added channels
-	if _, ok := validChannels[m.ChannelID]; ok && m.Author.ID == comfylatronID {
+	if _, ok := currentMatch[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
 		if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
 			currentMatch[m.ChannelID] = parser.NewMatch()
