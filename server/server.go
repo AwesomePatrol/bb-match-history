@@ -76,5 +76,28 @@ func OpenHTTP(addr string) {
 	router.GET("/api/match/current", func(c *gin.Context) {
 		c.JSON(http.StatusOK, discord.GetCurrent())
 	})
+	router.GET("/api/match/mvp", func(c *gin.Context) {
+		defenders, err := stats.QueryGlobalMVP("Defender")
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+		}
+		deaths, err := stats.QueryGlobalMVP("Deaths")
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+		}
+		builders, err := stats.QueryGlobalMVP("Builder")
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+		}
+		c.JSON(http.StatusOK, struct {
+			Defenders []stats.MVPquery
+			Deaths    []stats.MVPquery
+			Builders  []stats.MVPquery
+		}{
+			Defenders: defenders,
+			Deaths:    deaths,
+			Builders:  builders,
+		})
+	})
 	router.Run(addr)
 }

@@ -1,0 +1,20 @@
+<div style="display: none" id="errorMsg"></div>
+</br>
+<div id="MVP"></div>
+</br>
+<script>
+$('#MVP').ready(function() {
+    $.getJSON( "/api/match/mvp")
+        .done(function(data) {
+            $("#MVP").html(getMVPTable(data)).show();
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            $("#errorMsg")
+                .html("Fetching recent matches failed: " + err)
+                .show();
+        });
+});
+</script>
+

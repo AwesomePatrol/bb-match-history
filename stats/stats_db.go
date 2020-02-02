@@ -40,6 +40,11 @@ func InsertMatch(match *Match) error {
 	return db.Create(match).Error
 }
 
+func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
+	err = db.Table("mv_pplayers").Where("title = ?", title).Select("name, count(name) as stat").Group("name").Order("stat desc").Limit(10).Scan(&mvp).Error
+	return
+}
+
 func queryMatchShort(id int) (match *Match, err error) {
 	match = new(Match)
 	matchDB := db.Preload("Players").First(match, id)

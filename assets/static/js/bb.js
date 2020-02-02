@@ -119,6 +119,44 @@ function fillLongMatchDetailsRows(details) {
     return tbl;
 }
 
+function getMVPTable(details) {
+    let tbl = $("<table>")
+        .addClass("table")
+        .addClass("table-hover")
+        .addClass("table-striped")
+        .append($("<thead>")
+            .addClass("table-secondary").append($("<tr>")
+            .append($("<td>").append("Defenders").attr("colSpan", "2"))
+            .append($("<td>").append("Deaths").attr("colSpan", "2"))
+            .append($("<td>").append("Builders").attr("colSpan", "2"))
+        ).append($("<tr>")
+            .append($("<td>").append("Name"))
+            .append($("<td>").append("Count"))
+            .append($("<td>").append("Name"))
+            .append($("<td>").append("Count"))
+            .append($("<td>").append("Name"))
+            .append($("<td>").append("Count"))
+        ));
+    
+    let body = $("<tbody>");
+    let n = Math.min(details.Defenders.length, details.Deaths.length, details.Builders.length)
+    for (let i=0; i<n; i++) {
+        let def = details.Defenders[i];
+        let ded = details.Deaths[i];
+        let bui = details.Builders[i];
+        body.append($("<tr>")
+            .append($("<td>").append(def.Name))
+            .append($("<td>").append(def.Stat))
+            .append($("<td>").append(ded.Name))
+            .append($("<td>").append(ded.Stat))
+            .append($("<td>").append(bui.Name))
+            .append($("<td>").append(bui.Stat))
+        );
+    }
+    tbl.append(body);
+    return tbl;
+}
+
 function getMatchDetails(event) {
     let id = event.data.ID;
     if (id == 0) {

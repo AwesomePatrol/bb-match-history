@@ -26,6 +26,11 @@ type Player struct {
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
+type MVPquery struct {
+	Name string
+	Stat int
+}
+
 type MVPplayer struct {
 	EmptyModel
 	Name  string
