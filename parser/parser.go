@@ -31,6 +31,7 @@ func NewMatch() (match *stats.Match) {
 	match.South.IsNorth = false
 	match.North.IsNorth = true
 	match.Start = time.Now().UTC()
+	match.Difficulty = stats.Normal
 	return
 }
 
