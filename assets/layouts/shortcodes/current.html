@@ -48,8 +48,10 @@ function fillSpec(details) {
             return;
         }
         body.append($("<tr>")
-            .append($("<td>").append(name))
-        );
+            .append($("<a>")
+                .attr("href", "/search/?name=" + encodeURIComponent(name))
+                .append($("<td>").append(name))
+        ));
     });
     tbl.append(body);
     return tbl;
