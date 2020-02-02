@@ -10,13 +10,15 @@
   </div>
 </label>
 <div style="display: none" id="errorMsg"></div>
-<div style="display: none" id="difficulty"></div>
-<div style="display: none" id="started"></div>
+<div style="display: none" id="allMatchInfo">
+<div id="difficulty"></div>
+<div id="started"></div>
 </br>
 <div style="width: 50%; float:left;" id="playerList"></div>
 <div style="width: 50%; float:right;" id="eventList"></div>
 </br>
 <div style="width: 50%; float:left;" id="spectatorList"></div>
+</div>
 <script>
 function checkInTeam(name, team) {
     if (team.Players == null) {
@@ -60,11 +62,20 @@ function fetchCurrent() {
     }
     $.getJSON(endpoint)
         .done(function(data) {
+            $("#errorMsg").hide();
+            if (typeof data.Players === 'undefined') {
+                $("#errorMsg")
+                    .html("There is no ongoing match to show!")
+                    .show();
+                $("#allMatchInfo").hide();
+                return;
+            }
             $("#playerList").html(fillShortMatchDetailsRows(data));
             $("#eventList").html(fillLongMatchDetailsRows(data));
             $("#spectatorList").html(fillSpec(data));
-            $("#difficulty").html("Difficulty: " + diff2str[data.Difficulty]).show();
-            $("#started").html("Started: " + moment(data.Start).fromNow()).show();
+            $("#difficulty").html("Difficulty: " + diff2str[data.Difficulty]);
+            $("#started").html("Started: " + moment(data.Start).fromNow());
+            $("#allMatchInfo").show();
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
@@ -72,6 +83,7 @@ function fetchCurrent() {
             $("#errorMsg")
                 .html("Fetching recent matches failed: " + err)
                 .show();
+            $("#allMatchInfo").hide();
         });
 }
 $('#matches').ready(fetchCurrent);
