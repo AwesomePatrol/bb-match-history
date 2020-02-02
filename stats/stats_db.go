@@ -92,8 +92,8 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
-func isInTeam(name string, team []*Player) bool {
-	for _, p := range team {
+func (team *Team) IsPlayerInTeam(name string) bool {
+	for _, p := range team.Players {
 		if p.Name == name {
 			return true
 		}
@@ -124,9 +124,9 @@ func QueryPlayerMatches(name string) ([]Match, error) {
 			return nil, err
 		}
 		switch {
-		case isInTeam(name, teamW.Players):
+		case teamW.IsPlayerInTeam(name):
 			player.History[i].IsWinner = &trueV
-		case isInTeam(name, teamL.Players):
+		case teamL.IsPlayerInTeam(name):
 			player.History[i].IsWinner = &falseV
 		default:
 			player.History[i].IsWinner = nil
