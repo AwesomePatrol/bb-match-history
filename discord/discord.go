@@ -13,20 +13,18 @@ import (
 
 const masterID = "213745524279345152"
 
+const casualServer = "671815098427244567"
+
 var (
-	currentMatch *stats.Match
-	bot          *discordgo.Session
+	bot           *discordgo.Session
+	validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
+	currentMatch  = map[string]*stats.Match{casualServer: parser.NewMatch()}
 )
-var validChannels = map[string]interface{}{"671815098427244567": nil, "493470400336887811": nil}
 
 const comfylatronID = "493392617258876948"
 
-func init() {
-	currentMatch = parser.NewMatch()
-}
-
 func GetCurrent() *stats.Match {
-	return currentMatch
+	return currentMatch[casualServer]
 }
 
 func OpenBot(token string) {
@@ -171,9 +169,9 @@ func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, true)
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
-		if processMatchMessages(s, lines[i], currentMatch, false) {
+		if processMatchMessages(s, lines[i], currentMatch[chanID], false) {
 			log.Println("shouldn't have ended")
-			currentMatch = parser.NewMatch()
+			currentMatch[chanID] = parser.NewMatch()
 		}
 	}
 }
@@ -227,8 +225,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Process only added channels
 	if _, ok := validChannels[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
-		if processMatchMessages(s, m.Message, currentMatch, false) {
-			currentMatch = parser.NewMatch()
+		if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
+			currentMatch[m.ChannelID] = parser.NewMatch()
 		}
 	}
 
