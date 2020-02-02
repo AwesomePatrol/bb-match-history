@@ -107,6 +107,9 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 		line := e.Description
 		line = strings.ReplaceAll(line, "\\", "")
 		log.Println("parsing:", line)
+		if strings.Contains(line, "MVP") {
+			parser.ParseMVP(match, line)
+		}
 		parser.ParseLineEmbed(match, line, t)
 	}
 	return false

@@ -61,6 +61,53 @@ func FixPlayers(match *stats.Match) {
 	match.South.Players = makeUnique(match.South.Players)
 }
 
+func ParseMVP(match *stats.Match, content string) {
+	lines := strings.Split(content, "\n")
+	if len(lines) != 9 {
+		log.Println("unexpected number of lines in MVP", len(lines))
+		return
+	}
+
+	var team *stats.Team
+	switch {
+	case strings.Contains(lines[0], "NORTH"):
+		team = match.North
+	case strings.Contains(lines[0], "SOUTH"):
+		team = match.South
+	default:
+		log.Println("unknown team name:", lines[0])
+		return
+	}
+
+	for _, i := range []int{1, 4, 7} {
+		mvp := new(stats.MVPplayer)
+		_, err := fmt.Sscanf(lines[i], "MVP %s", &mvp.Title)
+		if err != nil {
+			log.Println("couldn't parse title:", lines[i], mvp.Title)
+			continue
+		}
+		mvp.Title = strings.ReplaceAll(mvp.Title, ":", "")
+		var format string
+		switch mvp.Title {
+		case "Defender":
+			format = "%s with a score of %d"
+		case "Builder":
+			format = "%s built %d things"
+		case "Deaths":
+			format = "%s died %d times"
+		default:
+			log.Println("unrecognized title", mvp.Title)
+			continue
+		}
+		_, err = fmt.Sscanf(lines[i+1], format, &mvp.Name, &mvp.Stat)
+		if err != nil {
+			log.Println("couldn't parse stats:", lines[i+1])
+			continue
+		}
+		team.MVPs = append(team.MVPs, mvp)
+	}
+}
+
 func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 	if match.Start.IsZero() {
 		match.Start = t
