@@ -41,7 +41,7 @@ func InsertMatch(match *Match) error {
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
-	err = db.Table("mv_pplayers").Where("title = ?", title).Select("name, count(name) as stat").Group("name").Order("stat desc").Limit(10).Scan(&mvp).Error
+	err = db.Table("mv_pplayers").Where("title = ?", title).Select("name, count(name) as stat, sum(stat) as total").Group("name").Order("stat desc").Limit(10).Scan(&mvp).Error
 	return
 }
 

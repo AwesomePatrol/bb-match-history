@@ -27,8 +27,9 @@ type Player struct {
 }
 
 type MVPquery struct {
-	Name string
-	Stat int
+	Name  string
+	Stat  int
+	Total int
 }
 
 type MVPplayer struct {

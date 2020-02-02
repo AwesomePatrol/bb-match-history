@@ -126,16 +126,19 @@ function getMVPTable(details) {
         .addClass("table-striped")
         .append($("<thead>")
             .addClass("table-secondary").append($("<tr>")
-            .append($("<td>").append("Defenders").attr("colSpan", "2"))
-            .append($("<td>").append("Deaths").attr("colSpan", "2"))
-            .append($("<td>").append("Builders").attr("colSpan", "2"))
+            .append($("<td>").append("Defenders").attr("colSpan", "3"))
+            .append($("<td>").append("Deaths").attr("colSpan", "3"))
+            .append($("<td>").append("Builders").attr("colSpan", "3"))
         ).append($("<tr>")
             .append($("<td>").append("Name"))
             .append($("<td>").append("Count"))
+            .append($("<td>").append("Total"))
             .append($("<td>").append("Name"))
             .append($("<td>").append("Count"))
+            .append($("<td>").append("Total"))
             .append($("<td>").append("Name"))
             .append($("<td>").append("Count"))
+            .append($("<td>").append("Total"))
         ));
     
     let body = $("<tbody>");
@@ -147,10 +150,13 @@ function getMVPTable(details) {
         body.append($("<tr>")
             .append($("<td>").append(def.Name))
             .append($("<td>").append(def.Stat))
+            .append($("<td>").append(def.Total))
             .append($("<td>").append(ded.Name))
             .append($("<td>").append(ded.Stat))
+            .append($("<td>").append(ded.Total))
             .append($("<td>").append(bui.Name))
             .append($("<td>").append(bui.Stat))
+            .append($("<td>").append(bui.Total))
         );
     }
     tbl.append(body);
