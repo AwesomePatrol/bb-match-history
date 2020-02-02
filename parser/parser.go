@@ -192,6 +192,20 @@ func removeFromTeam(name string, team *stats.Team) bool {
 	return false
 }
 
+func processJoin(match *stats.Match, teamName string, player *stats.Player) {
+	var team *stats.Team
+	switch teamName {
+	case "north":
+		team = match.North
+	case "south":
+		team = match.South
+	default:
+		log.Println("unknown team name:", teamName)
+		return
+	}
+	team.Players = append(team.Players, player)
+}
+
 func ParseLine(match *stats.Match, line string, t time.Time) {
 	switch {
 	case strings.HasSuffix(line, "has joined the game"):
@@ -215,23 +229,15 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			break
 		}
 		match.Timeline = append(match.Timeline, event)
-	case strings.HasSuffix(line, "has joined team north!"):
-		player := new(stats.Player)
-		_, err := fmt.Sscanf(line, "%s has joined team north!", &player.Name)
+	case strings.Contains(line, "has joined team"):
+		var teamName, name string
+		_, err := fmt.Sscanf(line, "%s has joined team %s", &name, &teamName)
 		if err != nil {
 			log.Println("failed to parse join:", err)
 			break
 		}
-		match.North.Players = append(match.North.Players, player)
-		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
-	case strings.HasSuffix(line, "has joined team south!"):
-		player := new(stats.Player)
-		_, err := fmt.Sscanf(line, "%s has joined team south!", &player.Name)
-		if err != nil {
-			log.Println("failed to parse join:", err)
-			break
-		}
-		match.South.Players = append(match.South.Players, player)
+		teamName = strings.ReplaceAll(teamName, "!", "")
+		processJoin(match, teamName, &stats.Player{Name: name})
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	case strings.Contains(line, " was killed "):
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.PlayerDeath, Payload: line, Timestamp: t})
@@ -246,5 +252,14 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			log.Println("player not in team, but spectating:", name, match.North.Players, match.South.Players)
 		}
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.LeaveTeam, Payload: line, Timestamp: t})
+	case strings.HasSuffix(line, "is no longer spectating."):
+		var teamName, name string
+		_, err := fmt.Sscanf(line, "Team %s player %s is no longer spectating.", &teamName, &name)
+		if err != nil {
+			log.Println("failed to parse no spectate:", err)
+			break
+		}
+		processJoin(match, teamName, &stats.Player{Name: name})
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
 	}
 }
