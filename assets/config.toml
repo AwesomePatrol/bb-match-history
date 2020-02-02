@@ -18,23 +18,23 @@ theme = "minimal-bootstrap-hugo-theme"
 [menu]
   [[menu.nav]]
   name = "Recent"
-  url = "/recent"
+  url = "/recent/"
   weight = 1
   [[menu.nav]]
   name = "Current"
-  url = "/current"
+  url = "/current/"
   weight = 2
   [[menu.nav]]
   name = "Leaderboards"
-  url = "/leaderboards"
+  url = "/leaderboards/"
   weight = 3
   [[menu.nav]]
   name = "Search"
-  url = "/search"
+  url = "/search/"
   weight = 4
   [[menu.nav]]
   name = "About"
-  url = "/about"
+  url = "/about/"
   weight = 5
 
 [markup]
