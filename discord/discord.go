@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/parser"
@@ -26,6 +27,7 @@ var (
 		tournamentServer: nil,
 		testServer:       nil,
 	}
+	mux sync.Mutex
 )
 
 const comfylatronID = "493392617258876948"
@@ -36,12 +38,16 @@ func init() {
 	}
 }
 func GetCurrentCasual() *stats.Match {
+	mux.Lock()
+	defer mux.Unlock()
 	m := currentMatch[casualServer]
 	parser.FixPlayers(m)
 	return m
 }
 
 func GetCurrentTournament() *stats.Match {
+	mux.Lock()
+	defer mux.Unlock()
 	m := currentMatch[tournamentServer]
 	parser.FixPlayers(m)
 	return m
@@ -197,6 +203,8 @@ func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 
 func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, true)
+	mux.Lock()
+	defer mux.Unlock()
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
 		if processMatchMessages(s, lines[i], currentMatch[chanID], false) {
 			log.Println("shouldn't have ended")
@@ -251,6 +259,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
+
+	mux.Lock()
+	defer mux.Unlock()
 
 	// Process only added channels
 	if _, ok := currentMatch[m.ChannelID]; ok && m.Author.ID == comfylatronID {
