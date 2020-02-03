@@ -35,13 +35,16 @@ func init() {
 		NewMatch(key)
 	}
 }
-
 func GetCurrentCasual() *stats.Match {
-	return currentMatch[casualServer]
+	m := currentMatch[casualServer]
+	parser.FixPlayers(m)
+	return m
 }
 
 func GetCurrentTournament() *stats.Match {
-	return currentMatch[tournamentServer]
+	m := currentMatch[tournamentServer]
+	parser.FixPlayers(m)
+	return m
 }
 
 func NewMatch(chanID string) (m *stats.Match) {
