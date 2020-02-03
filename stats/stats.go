@@ -26,6 +26,11 @@ type Player struct {
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
+type Channel struct {
+	ID      string  `gorm:"PRIMARY_KEY"`
+	History []Match `gorm:"foreignkey:ChannelID"`
+}
+
 type MVPquery struct {
 	Name  string
 	Stat  int
@@ -112,6 +117,7 @@ type Match struct {
 	Difficulty   `sql:"type:difficulty"`
 	Timeline     []*Event `gorm:"foreignkey:MatchID" json:",omitempty"`
 	IsWinner     *bool    `json:",omitempty"`
+	ChannelID    string   `json:"-"`
 }
 
 func (m *Match) String() string {

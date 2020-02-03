@@ -20,6 +20,7 @@ func OpenDB(path string) {
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&MVPplayer{})
 	db.AutoMigrate(&Team{})
+	db.AutoMigrate(&Channel{})
 	db.AutoMigrate(&Match{})
 }
 

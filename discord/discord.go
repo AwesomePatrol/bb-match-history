@@ -22,13 +22,19 @@ const (
 var (
 	bot          *discordgo.Session
 	currentMatch = map[string]*stats.Match{
-		casualServer:     parser.NewMatch(),
-		tournamentServer: parser.NewMatch(),
-		testServer:       parser.NewMatch(),
+		casualServer:     nil,
+		tournamentServer: nil,
+		testServer:       nil,
 	}
 )
 
 const comfylatronID = "493392617258876948"
+
+func init() {
+	for key := range currentMatch {
+		NewMatch(key)
+	}
+}
 
 func GetCurrentCasual() *stats.Match {
 	return currentMatch[casualServer]
@@ -36,6 +42,13 @@ func GetCurrentCasual() *stats.Match {
 
 func GetCurrentTournament() *stats.Match {
 	return currentMatch[tournamentServer]
+}
+
+func NewMatch(chanID string) (m *stats.Match) {
+	m = parser.NewMatch()
+	m.ChannelID = chanID
+	currentMatch[chanID] = m
+	return
 }
 
 func OpenBot(token string) {
@@ -168,11 +181,13 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time, curren
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, false)
 	historyMatch := parser.NewMatch()
+	historyMatch.ChannelID = chanID
 	skip := true
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
 		if processMatchMessages(s, lines[i], historyMatch, skip) {
 			skip = false
 			historyMatch = parser.NewMatch()
+			historyMatch.ChannelID = chanID
 		}
 	}
 }
@@ -182,7 +197,7 @@ func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
 		if processMatchMessages(s, lines[i], currentMatch[chanID], false) {
 			log.Println("shouldn't have ended")
-			currentMatch[chanID] = parser.NewMatch()
+			NewMatch(chanID)
 		}
 	}
 }
@@ -192,7 +207,7 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 		sendReplyInDM(s, m.Author.ID, "ok")
 	}
 	if m.Content == `!addChannel` {
-		currentMatch[m.ChannelID] = parser.NewMatch()
+		NewMatch(m.ChannelID)
 		sendReplyInDM(s, m.Author.ID, "channel "+m.ChannelID+" added")
 	}
 	if strings.HasPrefix(m.Content, "!parseHistory") {
@@ -222,9 +237,7 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 			log.Println("parseCurrent command failed: timestamp:", err)
 			return
 		}
-		if _, ok := currentMatch[chanID]; !ok {
-			currentMatch[chanID] = parser.NewMatch()
-		}
+		NewMatch(chanID)
 		sendReplyInDM(s, m.Author.ID, "parsing current match from "+chanID+" started")
 		go parseCurrent(s, chanID, t)
 	}
@@ -240,7 +253,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if _, ok := currentMatch[m.ChannelID]; ok && m.Author.ID == comfylatronID {
 		log.Println(*m.Message, m.Author.ID)
 		if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
-			currentMatch[m.ChannelID] = parser.NewMatch()
+			NewMatch(m.ChannelID)
 		}
 	}
 
