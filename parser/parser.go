@@ -262,5 +262,14 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		}
 		processJoin(match, teamName, &stats.Player{Name: name})
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.JoinTeam, Payload: line, Timestamp: t})
+	case strings.Contains(line, " flasks of "):
+		var teamName, name, scienceName string
+		var amount int
+		_, err := fmt.Sscanf(line, "%s fed %d flasks of %s science to team %s biters!", &name, &amount, &scienceName, &teamName)
+		if err != nil {
+			log.Println("failed to parse feeding:", err)
+			break
+		}
+		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.Feed, Payload: line, Timestamp: t})
 	}
 }

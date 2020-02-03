@@ -60,6 +60,7 @@ const (
 	DifficultyChange
 	WinnerAnnounce
 	GameTimeAnnounce
+	Feed
 )
 
 func (p *EventType) Scan(value interface{}) error {
