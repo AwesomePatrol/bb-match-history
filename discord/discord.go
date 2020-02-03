@@ -73,6 +73,8 @@ func OpenBot(token string) {
 	if err != nil {
 		panic(fmt.Errorf("error opening connection: %s", err))
 	}
+
+	go parseCurrent(bot, casualServer, time.Now().AddDate(0, 0, -1))
 }
 
 func CloseBot() {
