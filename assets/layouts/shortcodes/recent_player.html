@@ -1,18 +1,18 @@
-<form id="search">
+<form style="display:inline;" id="search">
   <input id="searchfield" type="text" placeholder="Player..." name="name">
   <button type="submit"><i class="fa fa-search"></i></button>
-  <label>
-      Match details:
-      <div id="detail" class="btn-group btn-group-toggle" data-toggle="buttons">
-      <label class="btn btn-secondary active">
-        <input type="radio" name="options" id="det-short" autocomplete="off" checked> teams
-      </label>
-      <label class="btn btn-secondary">
-        <input type="radio" name="options" id="det-long" autocomplete="off"> events
-      </label>
-      </div>
-  </label>
 </form>
+<label>
+  Match details:
+  <div id="detail" class="btn-group btn-group-toggle" data-toggle="buttons">
+  <label class="btn btn-secondary active">
+    <input type="radio" name="details" id="det-short" autocomplete="off" checked> teams
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="details" id="det-long" autocomplete="off"> events
+  </label>
+  </div>
+</label>
 </br>
 <div id="winrate" style="display: none"></div>
 <div id="diffBreak" style="display: none"></div>
