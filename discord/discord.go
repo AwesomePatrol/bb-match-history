@@ -15,9 +15,10 @@ import (
 const masterID = "213745524279345152"
 
 const (
-	casualServer     = "493470400336887811"
-	tournamentServer = "632636538605273160"
-	testServer       = "671815098427244567"
+	casualServer        = "493470400336887811"
+	oldTournamentServer = "632636538605273160"
+	tournamentServer    = "634449224746139658"
+	testServer          = "671815098427244567"
 )
 
 var (
