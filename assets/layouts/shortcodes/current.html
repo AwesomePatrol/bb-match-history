@@ -90,7 +90,16 @@ function fetchCurrent() {
             $("#allMatchInfo").hide();
         });
 }
-$('#matches').ready(fetchCurrent);
+$('#matches').ready(function() {
+    let query = window.location.href.slice(window.location.href.indexOf('?type=') + 1);
+    query = query.split("=");
+    if (query.length > 1 && query[1].length > 0) {
+        if (query[1] == "tournament") {
+            $("#det-tournament").click();
+        }
+    }
+    fetchCurrent();
+});
 $('#matchType').change(fetchCurrent);
 </script>
 
