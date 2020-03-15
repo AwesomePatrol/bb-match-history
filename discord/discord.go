@@ -76,6 +76,7 @@ func OpenBot(token string) {
 	}
 
 	go parseCurrent(bot, casualServer, time.Now().AddDate(0, 0, -1))
+	go parseCurrent(bot, tournamentServer, time.Now().AddDate(0, 0, -1))
 }
 
 func CloseBot() {
@@ -98,32 +99,36 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *sta
 	return _processMatchMessages(s, m, match, t, skip)
 }
 
+func processMatchEnd(match *stats.Match, t time.Time, skip bool) bool {
+	log.Println("GAME RESTART")
+	parser.FixPlayers(match)
+
+	// Server stops after match restart
+	if match.End.IsZero() || match.Start.After(match.End) {
+		match.End = t
+	}
+
+	log.Println(match)
+
+	if skip {
+		log.Println("do not insert a partial match")
+		return true
+	}
+	err := stats.InsertMatch(match)
+	if err != nil {
+		log.Println("will be skipped:", err)
+	}
+	return true
+}
+
 func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *stats.Match, t time.Time, skip bool) bool {
 	for _, line := range strings.Split(m.Content, "\n") {
 		if len(line) < 4 {
 			continue
 		}
 		// Process map restart
-		if strings.Contains(line, "Map is restarting") {
-			log.Println("GAME RESTART")
-			parser.FixPlayers(match)
-
-			// Server stops after match restart
-			if match.End.IsZero() || match.Start.After(match.End) {
-				match.End = t
-			}
-
-			log.Println(match)
-
-			if skip {
-				log.Println("do not insert a partial match")
-				return true
-			}
-			err := stats.InsertMatch(match)
-			if err != nil {
-				log.Println("will be skipped:", err)
-			}
-			return true
+		if strings.Contains(line, "Map is restarting") || strings.Contains(line, "Server is shutting down") {
+			return processMatchEnd(match, t, skip)
 		}
 
 		// Process bold messages
@@ -144,7 +149,9 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 		if strings.Contains(line, "MVP") {
 			parser.ParseMVP(match, line)
 		}
-		parser.ParseLineEmbed(match, line, t)
+		if parser.ParseLineEmbed(match, line, t) {
+			return processMatchEnd(match, t, skip)
+		}
 	}
 	return false
 }

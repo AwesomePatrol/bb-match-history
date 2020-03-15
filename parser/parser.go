@@ -109,8 +109,8 @@ func ParseMVP(match *stats.Match, content string) {
 	}
 }
 
-func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
-	if match.Start.IsZero() {
+func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
+	if match.Start.IsZero() || match.Start.After(t) {
 		match.Start = t
 	}
 	switch {
@@ -156,6 +156,7 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 			match.Start = t
 		case "Server has **stopped**":
 			match.End = t
+			return true
 		}
 	case strings.HasSuffix(line, "has won!"):
 		switch line {
@@ -180,6 +181,7 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) {
 		match.Length = time.Hour*time.Duration(hours) + time.Minute*time.Duration(minutes)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.GameTimeAnnounce, Payload: line, Timestamp: t})
 	}
+	return false
 }
 
 func removeFromTeam(name string, team *stats.Team) bool {
