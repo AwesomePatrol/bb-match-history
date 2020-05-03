@@ -15,7 +15,8 @@ import (
 const masterID = "213745524279345152"
 
 const (
-	casualServer        = "493470400336887811"
+	// casualServer        = "493470400336887811"
+	casualServer        = "548217578179264522"
 	oldTournamentServer = "632636538605273160"
 	tournamentServer    = "634449224746139658"
 	testServer          = "671815098427244567"
