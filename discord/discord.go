@@ -14,20 +14,13 @@ import (
 
 const masterID = "213745524279345152"
 
-const (
-	// casualServer        = "493470400336887811"
-	casualServer        = "548217578179264522"
-	oldTournamentServer = "632636538605273160"
-	tournamentServer    = "634449224746139658"
-	testServer          = "671815098427244567"
-)
-
 var (
-	bot          *discordgo.Session
-	currentMatch = map[string]*stats.Match{
-		casualServer:     nil,
-		tournamentServer: nil,
-		testServer:       nil,
+	casualServer     = ""
+	tournamentServer = ""
+	testServer       = "671815098427244567"
+	bot              *discordgo.Session
+	currentMatch     = map[string]*stats.Match{
+		testServer: nil,
 	}
 	mux sync.Mutex
 )
@@ -39,20 +32,24 @@ func init() {
 		NewMatch(key)
 	}
 }
-func GetCurrentCasual() *stats.Match {
+
+func _getCurrentMatch(id string) *stats.Match {
 	mux.Lock()
 	defer mux.Unlock()
-	m := currentMatch[casualServer]
+	if id == "" {
+		return nil
+	}
+	m := currentMatch[id]
 	parser.FixPlayers(m)
 	return m
 }
 
+func GetCurrentCasual() *stats.Match {
+	return _getCurrentMatch(casualServer)
+}
+
 func GetCurrentTournament() *stats.Match {
-	mux.Lock()
-	defer mux.Unlock()
-	m := currentMatch[tournamentServer]
-	parser.FixPlayers(m)
-	return m
+	return _getCurrentMatch(tournamentServer)
 }
 
 func NewMatch(chanID string) (m *stats.Match) {
@@ -76,8 +73,7 @@ func OpenBot(token string) {
 		panic(fmt.Errorf("error opening connection: %s", err))
 	}
 
-	go parseCurrent(bot, casualServer, time.Now().AddDate(0, 0, -1))
-	go parseCurrent(bot, tournamentServer, time.Now().AddDate(0, 0, -1))
+	go scanChannels(bot, "")
 }
 
 func CloseBot() {
@@ -85,6 +81,10 @@ func CloseBot() {
 }
 
 func sendReplyInDM(s *discordgo.Session, recipientID string, content string) {
+	log.Println("reply in DM:", content)
+	if recipientID == "" {
+		return
+	}
 	ch, err := s.UserChannelCreate(recipientID)
 	if err != nil {
 		log.Println(err)
@@ -224,9 +224,44 @@ func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	}
 }
 
+func scanChannels(s *discordgo.Session, authorID string) {
+	isCasual := len(currentMatch) - 1 // for now the first new channel found will be assumed casual; len-testServer
+	for _, guild := range s.State.Guilds {
+		channels, err := s.GuildChannels(guild.ID)
+		if err != nil {
+			log.Println("failed to get guild channels:", err)
+			return
+		}
+		for _, c := range channels {
+			if c.Type != discordgo.ChannelTypeGuildText {
+				continue
+			}
+			if _, ok := currentMatch[c.ID]; ok {
+				log.Println("channel already added:", c.ID)
+				continue
+			}
+			if strings.HasPrefix(c.Name, "s") && strings.Contains(c.Name, "biter-battle") {
+				if isCasual == 0 {
+					casualServer = c.ID
+					sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name+" as casual")
+				} else {
+					sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name)
+				}
+				NewMatch(c.ID)
+				go parseCurrent(s, c.ID, time.Now().AddDate(0, 0, -1))
+				isCasual++
+			}
+		}
+	}
+	sendReplyInDM(s, authorID, "Done.")
+}
+
 func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == `!test` {
 		sendReplyInDM(s, m.Author.ID, "ok")
+	}
+	if m.Content == `!scanChannels` {
+		go scanChannels(s, m.Author.ID)
 	}
 	if m.Content == `!addChannel` {
 		NewMatch(m.ChannelID)
