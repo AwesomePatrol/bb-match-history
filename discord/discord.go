@@ -22,10 +22,12 @@ var (
 	currentMatch     = map[string]*stats.Match{
 		testServer: nil,
 	}
+	trustedBotIDs = map[string]string{
+		"493392617258876948": "comfylatron",
+		"785636002739388426": "factoriodiscordbot",
+	}
 	mux sync.Mutex
 )
-
-const comfylatronID = "493392617258876948"
 
 func init() {
 	for key := range currentMatch {
@@ -240,7 +242,8 @@ func scanChannels(s *discordgo.Session, authorID string) {
 				log.Println("channel already added:", c.ID)
 				continue
 			}
-			if strings.HasPrefix(c.Name, "s") && strings.Contains(c.Name, "biter-battle") {
+			if c.Name == "bb-server-chat" ||
+				(strings.HasPrefix(c.Name, "s") && strings.Contains(c.Name, "biter-battle")) {
 				if isCasual == 0 {
 					casualServer = c.ID
 					sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name+" as casual")
@@ -310,10 +313,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	defer mux.Unlock()
 
 	// Process only added channels
-	if _, ok := currentMatch[m.ChannelID]; ok && m.Author.ID == comfylatronID {
-		log.Println(*m.Message, m.Author.ID)
-		if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
-			NewMatch(m.ChannelID)
+	if _, ok := currentMatch[m.ChannelID]; ok {
+		if _, ok := trustedBotIDs[m.Author.ID]; ok {
+			log.Println(*m.Message, m.Author.ID)
+			if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
+				NewMatch(m.ChannelID)
+			}
 		}
 	}
 
