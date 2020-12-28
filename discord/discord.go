@@ -15,12 +15,13 @@ import (
 const masterID = "213745524279345152"
 
 var (
-	casualServer     = ""
+	casualServer     = "781628243223642123"
 	tournamentServer = ""
 	testServer       = "671815098427244567"
 	bot              *discordgo.Session
 	currentMatch     = map[string]*stats.Match{
-		testServer: nil,
+		testServer:   nil,
+		casualServer: nil,
 	}
 	trustedBotIDs = map[string]string{
 		"493392617258876948": "comfylatron",
@@ -227,7 +228,6 @@ func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 }
 
 func scanChannels(s *discordgo.Session, authorID string) {
-	isCasual := len(currentMatch) - 1 // for now the first new channel found will be assumed casual; len-testServer
 	for _, guild := range s.State.Guilds {
 		channels, err := s.GuildChannels(guild.ID)
 		if err != nil {
@@ -242,17 +242,10 @@ func scanChannels(s *discordgo.Session, authorID string) {
 				log.Println("channel already added:", c.ID)
 				continue
 			}
-			if c.Name == "bb-server-chat" ||
-				(strings.HasPrefix(c.Name, "s") && strings.Contains(c.Name, "biter-battle")) {
-				if isCasual == 0 {
-					casualServer = c.ID
-					sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name+" as casual")
-				} else {
-					sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name)
-				}
+			if c.Name == "bb-server-chat" || (strings.HasPrefix(c.Name, "s") && strings.Contains(c.Name, "biter-battle")) {
+				sendReplyInDM(s, authorID, "Adding channel "+c.ID+" with name: "+c.Name)
 				NewMatch(c.ID)
 				go parseCurrent(s, c.ID, time.Now().AddDate(0, 0, -1))
-				isCasual++
 			}
 		}
 	}
