@@ -151,8 +151,8 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 		// Process bold messages
 		if strings.HasPrefix(line, "**") {
 			line = strings.ReplaceAll(line, "\\", "")
-			line := strings.Trim(line, "*")
-			log.Println("parsing:", line)
+			line = strings.Trim(line, "*")
+			log.Println("parsing bold:", line)
 			parser.ParseLine(match, line, t)
 			return false
 		}
@@ -162,7 +162,7 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 	for _, e := range m.Embeds {
 		line := e.Description
 		line = strings.ReplaceAll(line, "\\", "")
-		log.Println("parsing:", line)
+		log.Println("parsing embed:", line)
 		if strings.Contains(line, "MVP") {
 			parser.ParseMVP(match, line)
 		}
