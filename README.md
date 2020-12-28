@@ -1,6 +1,6 @@
 # Biter Battles Match History
 
-Hosted on: http://bb.patrol.neutrino.re/recent/
+Hosted on: http://bb.patrol.neutrino.re/recent/ and http://bb-raven.patrol.neutrino.re/recent/
 
 ## Run
 
