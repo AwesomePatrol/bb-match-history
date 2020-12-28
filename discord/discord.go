@@ -76,7 +76,7 @@ func OpenBot(token string) {
 		panic(fmt.Errorf("error opening connection: %s", err))
 	}
 
-	go scanChannels(bot, "")
+	go parseCurrent(bot, casualServer, time.Now().AddDate(0, 0, -1))
 }
 
 func CloseBot() {
