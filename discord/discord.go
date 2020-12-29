@@ -394,7 +394,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// TODO: add possibility to have more pairs
 	// Process annouce channel separately.
-	if m.ChannelID != annouceServer[casualServer] {
+	if m.ChannelID == annouceServer[casualServer] {
 		log.Println(*m.Message, m.Author.ID)
 		processMatchMessages(s, m.Message, currentMatch[casualServer], false)
 	}
