@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -170,9 +171,12 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 			log.Println("parsing embed:", line)
 			if strings.Contains(line, "MVP") {
 				parser.ParseMVP(match, line)
+				continue
 			}
-			if parser.ParseLineEmbed(match, line, t) {
-				return processMatchEnd(match, t, skip)
+			for _, l := range strings.Split(line, "\n") {
+				if parser.ParseLineEmbed(match, l, t) {
+					return processMatchEnd(match, t, skip)
+				}
 			}
 		}
 	}
@@ -223,7 +227,17 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time, curren
 // parseHistory reads all messages in chanID that are newer than time t and then inserts all parsed
 // matches in the database.
 func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
-	lines := getRelevantHistory(s, chanID, t, false)
+	linesRegular := getRelevantHistory(s, chanID, t, false)
+	var linesAnnouce []*discordgo.Message
+	if annouce, ok := annouceServer[chanID]; ok {
+		linesAnnouce = getRelevantHistory(s, annouce, t, false)
+	}
+	lines := append(linesRegular, linesAnnouce...)
+	sort.Slice(lines, func(i, j int) bool {
+		ti, _ := discordgo.SnowflakeTimestamp(lines[i].ID)
+		tj, _ := discordgo.SnowflakeTimestamp(lines[j].ID)
+		return ti.After(tj)
+	})
 	historyMatch := parser.NewMatch()
 	historyMatch.ChannelID = chanID
 	skip := true
@@ -363,15 +377,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if _, ok := trustedBotIDs[m.Author.ID]; !ok {
 		return
 	}
-	// Process only added channels [or relevant annouce servers]
-	if _, ok := currentMatch[m.ChannelID]; !ok && m.ChannelID != annouceServer[casualServer] {
+
+	// Process only added channels
+	if _, ok := currentMatch[m.ChannelID]; ok {
+		log.Println(*m.Message, m.Author.ID)
+		if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
+			// Match ended so a new one should be created
+			NewMatch(m.ChannelID)
+		}
 		return
 	}
 
-	log.Println(*m.Message, m.Author.ID)
-	if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
-		// Match ended so a new one should be created
-		NewMatch(m.ChannelID)
+	// TODO: add possibility to have more pairs
+	// Process annouce channel separately.
+	if m.ChannelID != annouceServer[casualServer] {
+		log.Println(*m.Message, m.Author.ID)
+		processMatchMessages(s, m.Message, currentMatch[casualServer], false)
 	}
-
 }

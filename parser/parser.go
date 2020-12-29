@@ -163,11 +163,11 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 			match.End = t
 			return true
 		}
-	case strings.HasSuffix(line, "has won!"):
-		switch line {
-		case "Team South has won!":
+	case strings.Contains(line, "has won"):
+		switch {
+		case strings.Contains(line, "South has won"):
 			match.NorthWon = false
-		case "Team North has won!":
+		case strings.Contains(line, "North has won"):
 			match.NorthWon = true
 		default:
 			log.Println("err: unknown team:", line)
