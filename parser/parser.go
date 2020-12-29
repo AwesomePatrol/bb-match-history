@@ -207,6 +207,7 @@ func processJoin(match *stats.Match, teamName string, player *stats.Player) {
 		return
 	}
 	team.Players = append(team.Players, player)
+	match.Players = append(match.Players, player)
 }
 
 func ParseLine(match *stats.Match, line string, t time.Time) {
