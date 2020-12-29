@@ -25,6 +25,10 @@ theme = "minimal-bootstrap-hugo-theme"
   url = "/current/"
   weight = 2
   [[menu.nav]]
+  name = "Leaderboards"
+  url = "/leaderboards/"
+  weight = 3
+  [[menu.nav]]
   name = "Search"
   url = "/search/"
   weight = 4
