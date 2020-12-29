@@ -94,7 +94,8 @@ const (
 	Normal
 	Hard
 	Nightmare
-	Insane
+	UltraViolence
+	FunAndFast
 )
 
 func (p *Difficulty) Scan(value interface{}) error {

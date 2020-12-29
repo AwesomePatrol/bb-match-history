@@ -115,39 +115,37 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 	}
 	switch {
 	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
-		var difficulty string
-
 		var diffConst stats.Difficulty
-		var err error
-		if line == ">> Map difficulty has changed to Piece of cake difficulty!" {
-			diffConst = stats.PieceOfCake
-			goto done
-		}
-		_, err = fmt.Sscanf(line, ">> Map difficulty has changed to %s difficulty!", &difficulty)
-		if err != nil {
-			log.Println("failed to parse difficulty:", err)
-			break
-		}
 
+		difficulty := strings.Replace(
+			strings.Replace(line, ">> Map difficulty has changed to", "", -1),
+			"difficulty!", "", -1)
+
+		// TODO: keep it in a map?
 		switch difficulty {
-		case "Peaceful":
+		case "Peaceful": // 1
+			fallthrough
+		case "I'm Too Young to Die":
 			diffConst = stats.Peaceful
-		case "Piece of cake":
+		case "Piece of Cake": // 2
 			diffConst = stats.PieceOfCake
-		case "Easy":
+		case "Easy": // 3
 			diffConst = stats.Easy
-		case "Normal":
+		case "Normal": // 4
 			diffConst = stats.Normal
-		case "Hard":
+		case "Hard": // 5
 			diffConst = stats.Hard
-		case "Nightmare":
+		case "Nightmare": // 6
 			diffConst = stats.Nightmare
-		case "Insane":
-			diffConst = stats.Insane
+		case "Ultra-Violence": // 7
+			diffConst = stats.UltraViolence
+		case "Insane": // 8
+			fallthrough
+		case "Fun and Fast":
+			diffConst = stats.FunAndFast
 		default:
 			log.Println("unknown difficulty:", difficulty)
 		}
-	done:
 		match.Difficulty = diffConst
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line, Timestamp: t})
 	case strings.HasPrefix(line, "Server has"):
