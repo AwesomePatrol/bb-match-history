@@ -1,11 +1,12 @@
 var diff2str = [
-  "Peaceful",
+  "I'm Too Young to Die",
   "Piece of Cake",
   "Easy",
   "Normal",
   "Hard",
   "Nightmare",
-  "Insane"
+  "Ultra-Violence",
+  "Fun and Fast"
   ];
 
 function showDifficultyBreakdown() {
