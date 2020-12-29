@@ -159,7 +159,6 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 			line = strings.Trim(line, "*")
 			log.Println("parsing bold:", line)
 			parser.ParseLine(match, line, t)
-			return false
 		}
 	}
 
