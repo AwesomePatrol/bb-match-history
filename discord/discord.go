@@ -24,6 +24,7 @@ var (
 		casualServer: nil,
 	}
 	trustedBotIDs = map[string]string{
+		"787435227656093708": "miniRaven",
 		"493392617258876948": "comfylatron",
 		"785636002739388426": "factoriodiscordbot",
 	}
