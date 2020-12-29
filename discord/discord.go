@@ -193,6 +193,12 @@ func getRelevantHistory(s *discordgo.Session, chanID string, t time.Time, curren
 		return
 	}
 	beforeID := ch.LastMessageID
+	m, err := s.ChannelMessage(chanID, beforeID)
+	if err != nil {
+		log.Println("failed to get the last message:", err)
+	} else {
+		lines = append(lines, m)
+	}
 	for {
 		msgs, err := s.ChannelMessages(chanID, 64, beforeID, "", "")
 		if err != nil {
