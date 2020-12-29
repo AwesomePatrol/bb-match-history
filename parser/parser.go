@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sort"
 	"strings"
 	"time"
 
@@ -12,15 +13,17 @@ import (
 )
 
 func makeUnique(players []*stats.Player) []*stats.Player {
-	m := make(map[string]struct{})
+	// FIXME it shouldn't be needed
+	m := make(map[string]*stats.Player)
 	for _, p := range players {
-		m[p.Name] = struct{}{}
+		m[p.Name] = p
 	}
 	iter := 0
-	for k := range m {
-		players[iter].Name = k
+	for _, p := range m {
+		players[iter] = p
 		iter++
 	}
+	sort.Slice(players[:iter], func(i, j int) bool { return players[i].Name < players[j].Name })
 	return players[:iter]
 }
 
