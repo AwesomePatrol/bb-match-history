@@ -109,17 +109,24 @@ func ParseMVP(match *stats.Match, content string) {
 	}
 }
 
-func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
+func fixStartEnd(match *stats.Match, t time.Time) {
 	if match.Start.IsZero() || match.Start.After(t) {
 		match.Start = t
 	}
+	if match.End.IsZero() || match.End.Before(t) {
+		match.End = t
+	}
+}
+
+func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
+	fixStartEnd(match, t)
 	switch {
 	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
 		var diffConst stats.Difficulty
 
 		difficulty := strings.Replace(
-			strings.Replace(line, ">> Map difficulty has changed to", "", -1),
-			"difficulty!", "", -1)
+			strings.Replace(line, ">> Map difficulty has changed to ", "", -1),
+			" difficulty!", "", -1)
 
 		// TODO: keep it in a map?
 		switch difficulty {
@@ -209,6 +216,7 @@ func processJoin(match *stats.Match, teamName string, player *stats.Player) {
 }
 
 func ParseLine(match *stats.Match, line string, t time.Time) {
+	fixStartEnd(match, t)
 	switch {
 	case strings.HasSuffix(line, "has joined the game"):
 		event := new(stats.Event)

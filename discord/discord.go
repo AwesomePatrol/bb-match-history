@@ -23,6 +23,9 @@ var (
 		testServer:   nil,
 		casualServer: nil,
 	}
+	annouceServer = map[string]string{
+		casualServer: "788221411034398771",
+	}
 	trustedBotIDs = map[string]string{
 		"787435227656093708": "miniRaven",
 		"493392617258876948": "comfylatron",
@@ -118,7 +121,7 @@ func processMatchEnd(match *stats.Match, t time.Time, skip bool) bool {
 	parser.FixPlayers(match)
 
 	// Server stops after match restart
-	if match.End.IsZero() || match.Start.After(match.End) {
+	if match.End.IsZero() || match.End.Before(t) {
 		match.End = t
 	}
 
@@ -161,14 +164,16 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 
 	// Process embed messages
 	for _, e := range m.Embeds {
-		line := e.Description
-		line = strings.ReplaceAll(line, "\\", "")
-		log.Println("parsing embed:", line)
-		if strings.Contains(line, "MVP") {
-			parser.ParseMVP(match, line)
-		}
-		if parser.ParseLineEmbed(match, line, t) {
-			return processMatchEnd(match, t, skip)
+		for _, f := range e.Fields {
+			line := f.Value
+			line = strings.ReplaceAll(line, "\\", "")
+			log.Println("parsing embed:", line)
+			if strings.Contains(line, "MVP") {
+				parser.ParseMVP(match, line)
+			}
+			if parser.ParseLineEmbed(match, line, t) {
+				return processMatchEnd(match, t, skip)
+			}
 		}
 	}
 	return false
@@ -231,14 +236,36 @@ func parseHistory(s *discordgo.Session, chanID string, t time.Time) {
 	}
 }
 
+// getMatchAnnoucements retreives relevant annoucements from a separate channel.
+func getMatchAnnoucements(lines []*discordgo.Message, match *stats.Match) (relevant []*discordgo.Message) {
+	for i := len(lines) - 1; i >= 0; i-- {
+		m := lines[i]
+		t, _ := discordgo.SnowflakeTimestamp(m.ID)
+		if t.Before(match.End) && t.After(match.Start) {
+			relevant = append(relevant, m)
+		}
+	}
+	return
+}
+
 // parseCurrent reads messages in chanID until the first match start (but no older than time t) and
 // then processes it into currentMatch.
 func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 	lines := getRelevantHistory(s, chanID, t, true)
+	var linesAnnouce []*discordgo.Message
+	if annouce, ok := annouceServer[chanID]; ok {
+		linesAnnouce = getRelevantHistory(s, annouce, t, true)
+	}
 	mux.Lock()
 	defer mux.Unlock()
 	for i := len(lines) - 1; i >= 0; i-- { // switch order
 		if processMatchMessages(s, lines[i], currentMatch[chanID], false) {
+			log.Println("shouldn't have ended")
+			NewMatch(chanID)
+		}
+	}
+	for _, m := range getMatchAnnoucements(linesAnnouce, currentMatch[chanID]) {
+		if processMatchMessages(s, m, currentMatch[chanID], false) {
 			log.Println("shouldn't have ended")
 			NewMatch(chanID)
 		}
@@ -327,20 +354,24 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	mux.Lock()
 	defer mux.Unlock()
 
-	// Process only added channels
-	if _, ok := currentMatch[m.ChannelID]; ok {
-		// Process only trusted authors (bots)
-		if _, ok := trustedBotIDs[m.Author.ID]; ok {
-			log.Println(*m.Message, m.Author.ID)
-			if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
-				// Match ended so a new one should be created
-				NewMatch(m.ChannelID)
-			}
-		}
-	}
-
 	// Commands for master only
 	if m.Author.ID == masterID {
 		processMasterCommands(s, m)
 	}
+
+	// Process only trusted authors (bots)
+	if _, ok := trustedBotIDs[m.Author.ID]; !ok {
+		return
+	}
+	// Process only added channels [or relevant annouce servers]
+	if _, ok := currentMatch[m.ChannelID]; !ok && m.ChannelID != annouceServer[casualServer] {
+		return
+	}
+
+	log.Println(*m.Message, m.Author.ID)
+	if processMatchMessages(s, m.Message, currentMatch[m.ChannelID], false) {
+		// Match ended so a new one should be created
+		NewMatch(m.ChannelID)
+	}
+
 }
