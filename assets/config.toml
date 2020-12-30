@@ -1,4 +1,5 @@
-baseURL = "http://bb-raven.patrol.neutrino.re/"
+#baseURL = "http://bb-raven.patrol.neutrino.re/"
+baseURL = "/"
 languageCode = "en-us"
 title = "(Raven's) Biter Battles - Match History"
 theme = "minimal-bootstrap-hugo-theme"
