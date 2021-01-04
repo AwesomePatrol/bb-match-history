@@ -15,6 +15,7 @@
 </label>
 </br>
 <div id="winrate" style="display: none"></div>
+<div id="elo" style="display: none"></div>
 <div id="diffBreak" style="display: none"></div>
 <table class="table table-striped table-hover" id="matches">
     <thead class="table-secondary">
@@ -55,9 +56,10 @@ function getPlayerMatchHistory() {
             showStats();
             showDifficultyBreakdown();
 
-            let main = window.location.href;
-            main = main.substring(0, main.lastIndexOf("/") + 1);
-            window.history.pushState({"pageTitle":"Player History: " + name},"", main + "?name=" + name);
+            urlParams.set("name", name);
+
+            history.pushState({}, "Player History: " + name,
+                "?" + urlParams.toString());
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
@@ -73,10 +75,9 @@ function getPlayerMatchHistory() {
         });
 }
 $(document).ready(function() {
-    let query = window.location.href.slice(window.location.href.indexOf('?name=') + 1);
-    query = query.split("=");
-    if (query.length > 1 && query[1].length > 0) {
-        $("#searchfield").val(query[1]);
+    let query = urlParams.get("name");
+    if (query != null) {
+        $("#searchfield").val(query);
         getPlayerMatchHistory();
     }
 })

@@ -1,4 +1,4 @@
-var diff2str = [
+const diff2str = [
   "I'm Too Young to Die",
   "Piece of Cake",
   "Easy",
@@ -8,6 +8,8 @@ var diff2str = [
   "Ultra-Violence",
   "Fun and Fast"
   ];
+
+const urlParams = new URLSearchParams(window.location.search);
 
 function showDifficultyBreakdown() {
     let df = $("#diffBreak");
@@ -33,6 +35,27 @@ function showDifficultyBreakdown() {
     df.show();
 }
 
+function fillShortMatchPlayerNameRow(team, i) {
+    let td = $("<td>");
+    if (i >= team.length) {
+        return td;
+    }
+    let name = team[i].Name;
+    td.append($("<a>")
+        .attr("href", "/search/?name=" + encodeURIComponent(name))
+        .append(name));
+    return td;
+}
+
+function fillShortMatchPlayerEloRow(team, i) {
+    let td = $("<td>");
+    if (i >= team.length) {
+        return td;
+    }
+    td.append(team[i].ELO);
+    return td;
+}
+
 function fillShortMatchDetailsRows(details) {
     let n_len = 0;
     let s_len = 0;
@@ -40,38 +63,37 @@ function fillShortMatchDetailsRows(details) {
         n_len = details.North.Players.length;
         s_len = details.South.Players.length;
     }
+    let tbl_thead = $("<tr>")
+            .addClass("table-secondary");
+    if (showELO()) {
+        tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
+            .append($("<td>").append("ELO"))
+            .append($("<td>").append("South Team [" + s_len + "]"))
+            .append($("<td>").append("ELO"));
+    } else {
+        tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
+            .append($("<td>").append("South Team [" + s_len + "]"));
+    }
     let tbl = $("<table>")
         .addClass("table")
         .addClass("table-sm")
         .addClass("table-hover")
         .addClass("table-striped")
-        .append($("<thead>").append($("<tr>")
-            .addClass("table-secondary")
-            .append($("<td>").append("North Team [" + n_len + "]"))
-            .append($("<td>").append("South Team [" + s_len + "]"))
-        ));
+        .append($("<thead>").append(tbl_thead));
 
     let body = $("<tbody>");
     let n = Math.max(n_len, s_len);
     for (let i=0; i<n; i++) {
-        let north = $("<td>");
-        if (i < n_len) {
-            let name = details.North.Players[i].Name;
-            north.append($("<a>")
-                .attr("href", "/search/?name=" + encodeURIComponent(name))
-                .append(name));
+        let tr = $("<tr>");
+        tr.append(fillShortMatchPlayerNameRow(details.North.Players, i));
+        if (showELO()) {
+            tr.append(fillShortMatchPlayerEloRow(details.North.Players, i));
         }
-        let south = $("<td>");
-        if (i < s_len) {
-            let name = details.South.Players[i].Name;
-            south.append($("<a>")
-                .attr("href", "/search/?name=" + encodeURIComponent(name))
-                .append(name));
+        tr.append(fillShortMatchPlayerNameRow(details.South.Players, i));
+        if (showELO()) {
+            tr.append(fillShortMatchPlayerEloRow(details.South.Players, i));
         }
-        body.append($("<tr>")
-            .append(north)
-            .append(south)
-        );
+        body.append(tr);
     }
     tbl.append(body);
     
@@ -232,4 +254,12 @@ function addRecentMatchesEntry(tbl, match) {
         }
     }
     tbl.append(row);
+}
+
+function showELO() {
+    let elo = urlParams.get("elo");
+    if (elo == null) {
+        return false;
+    }
+    return elo == "1";
 }
