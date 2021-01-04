@@ -93,6 +93,51 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
+func updatePlayerELO(p *Player) (err error) {
+	err = db.Model(p).Update("ELO", p.ELO).Error
+	return
+}
+
+func updateTeamELO(t *Team) (err error) {
+	for _, p := range t.Players {
+		err = updatePlayerELO(p)
+		if err != nil {
+			return
+		}
+	}
+	return nil
+}
+
+func ShouldUpdateELO() (update bool, err error) {
+	p := &Player{}
+	err = db.Order("ELO desc").First(p).Error
+	if err != nil {
+		return
+	}
+	return p.ELO == 0, nil
+}
+
+// UpdateELO iterates over all matches (from oldest to newest) and updates players' ELO.
+func UpdateELO() (err error) {
+	matches := make([]Match, 0, 128)
+	err = db.Order("start asc").Find(&matches).Error
+	if err != nil {
+		return
+	}
+	for _, mi := range matches {
+		var m *Match
+		// Team's players need to be queried here so that ELO values will be updated.
+		m, err = queryMatchShort(int(mi.ID))
+		if err != nil {
+			return
+		}
+		m.UpdateMatchELO()
+		updateTeamELO(m.North)
+		updateTeamELO(m.South)
+	}
+	return nil
+}
+
 func (team *Team) IsPlayerInTeam(name string) bool {
 	for _, p := range team.Players {
 		if p.Name == name {

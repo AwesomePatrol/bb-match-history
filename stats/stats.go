@@ -22,7 +22,8 @@ type EmptyModel struct {
 }
 
 type Player struct {
-	Name    string  `gorm:"PRIMARY_KEY"`
+	Name    string `gorm:"PRIMARY_KEY"`
+	ELO     int
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
@@ -74,7 +75,7 @@ func (p *EventType) Scan(value interface{}) error {
 }
 
 func (p EventType) Value() (string, error) {
-	return string(p), nil
+	return fmt.Sprint(p), nil
 }
 
 type Event struct {
@@ -104,7 +105,7 @@ func (p *Difficulty) Scan(value interface{}) error {
 }
 
 func (p Difficulty) Value() (string, error) {
-	return string(p), nil
+	return fmt.Sprint(p), nil
 }
 
 type Match struct {

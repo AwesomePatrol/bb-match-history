@@ -35,6 +35,17 @@ func main() {
 		discord.OpenBot(token)
 		defer discord.CloseBot()
 	}
+	update, err := stats.ShouldUpdateELO()
+	if err != nil {
+		log.Println("failed to check if ELO was updated:", err)
+		return
+	}
+	if update {
+		err := stats.UpdateELO()
+		if err != nil {
+			log.Println("elo update failed:", err)
+		}
+	}
 
 	server.OpenHTTP(addr)
 
