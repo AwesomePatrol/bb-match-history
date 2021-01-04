@@ -38,6 +38,12 @@ func InsertMatch(match *Match) error {
 	if n > 0 {
 		return fmt.Errorf("already in db")
 	}
+
+	// Calculate ELO and update player's ELO values in db.
+	match.UpdateMatchELO()
+	updateTeamELO(match.North)
+	updateTeamELO(match.South)
+
 	return db.Create(match).Error
 }
 
