@@ -246,9 +246,9 @@ function addRecentMatchesEntry(tbl, match) {
     }
     let diffStr = diff2str[match.Difficulty];
     let row = $("<tr>")
-      .append($("<a>")
+      .append($("<td>").append($("<a>")
                 .attr("href", "/match/?id=" + match.ID)
-                .append($("<td>").append(match.ID)))
+                .append(match.ID)))
       .append($("<td>").append(ago.fromNow()))
       .append($("<td>").append(moment.duration(match.Length/1000000).humanize()))
       .append($("<td>").append(winner))
