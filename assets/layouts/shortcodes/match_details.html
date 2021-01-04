@@ -1,0 +1,47 @@
+<div style="display: none" id="errorMsg"></div>
+<div style="display: none" id="allMatchInfo">
+<div id="started"></div>
+<div id="length"></div>
+<div id="difficulty"></div>
+</br>
+<div style="width: 50%; float:left;" id="playerList"></div>
+<div style="width: 50%; float:right;" id="eventList"></div>
+</br>
+</div>
+<script>
+function fetchByID(id) {
+    let endpoint = "/api/match/long/" + id;
+    $.getJSON(endpoint)
+        .done(function(data) {
+            $("#errorMsg").hide();
+            $("#playerList").html(fillShortMatchDetailsRows(data));
+            // Reverse event list order (newest on top)
+            data.Timeline.reverse();
+            $("#eventList").html(fillLongMatchDetailsRows(data));
+            $("#difficulty").html("Difficulty: " + diff2str[data.Difficulty]);
+            $("#started").html("Started: " + moment(data.Start).fromNow() + " [" +
+                moment(data.Start).format("dddd, MMMM Do YYYY, H:mm:ss") + "]");
+            let match_len = moment.duration(data.Length/1000000);
+            $("#length").html("Length: " + match_len.hours() + "h " + match_len.minutes() + "m");
+            $("#allMatchInfo").show();
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            $("#errorMsg")
+                .html("Fetching recent matches failed: " + err)
+                .show();
+            $("#allMatchInfo").hide();
+        });
+}
+$('#matches').ready(function() {
+    let id = urlParams.get("id");
+    if (id == null) {
+        $("#errorMsg")
+            .html("unspecified id")
+            .show();
+        return;
+    }
+    fetchByID(id);
+});
+</script>
