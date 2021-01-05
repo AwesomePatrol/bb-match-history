@@ -340,6 +340,21 @@ func processMasterCommands(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == `!test` {
 		sendReplyInDM(s, m.Author.ID, "ok")
 	}
+	if m.Content == `!resetELO` {
+		go func() {
+			mux.Lock()
+			defer mux.Unlock()
+			err := stats.ResetELO()
+			if err != nil {
+				log.Println("elo reset failed:", err)
+				return
+			}
+			err = stats.UpdateELO()
+			if err != nil {
+				log.Println("elo update failed:", err)
+			}
+		}()
+	}
 	if m.Content == `!scanChannels` {
 		go scanChannels(s, m.Author.ID)
 	}

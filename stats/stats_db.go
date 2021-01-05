@@ -205,6 +205,11 @@ func ShouldUpdateELO() (update bool, err error) {
 	return p.ELO == 0, nil
 }
 
+func ResetELO() (err error) {
+	err = db.Model(&Player{}).Update("elo", 0).Error
+	return
+}
+
 // UpdateELO iterates over all matches (from oldest to newest) and updates players' ELO.
 func UpdateELO() (err error) {
 	matches := make([]Match, 0, 128)
@@ -220,6 +225,7 @@ func UpdateELO() (err error) {
 			return
 		}
 		m.UpdateMatchELO()
+		log.Println("elo update for: ", m.ID)
 		updateTeamELO(m.North)
 		updateTeamELO(m.South)
 	}
