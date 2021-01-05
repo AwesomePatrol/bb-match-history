@@ -1,6 +1,8 @@
-<div style="display: none" id="errorMsg"></div>
+<div style="display: none" id="errorMsg-mvp"></div>
+<div style="display: none" id="errorMsg-elo"></div>
 </br>
 <div id="MVP"></div>
+<div id="ELO"></div>
 </br>
 <script>
 $('#MVP').ready(function() {
@@ -11,8 +13,45 @@ $('#MVP').ready(function() {
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
             console.log( "Request Failed: " + err );
-            $("#errorMsg")
-                .html("Fetching recent matches failed: " + err)
+            $("#errorMsg-mvp")
+                .html("Fetching MVP failed: " + err)
+                .show();
+        });
+});
+$('#ELO').ready(function() {
+    if (!showELO()) {
+        return;
+    }
+    $.getJSON( "/api/elo/100")
+        .done(function(data) {
+            let tbl_thead = $("<tr>")
+                    .addClass("table-secondary");
+            tbl_thead.append($("<td>").append("#"));
+            tbl_thead.append($("<td>").append("Name"));
+            tbl_thead.append($("<td>").append("ELO"));
+            let tbl = $("<table>")
+                .addClass("table")
+                .addClass("table-sm")
+                .addClass("table-hover")
+                .addClass("table-striped")
+                .append($("<thead>").append(tbl_thead));
+
+            let body = $("<tbody>");
+            for (let i=0; i<data.length; i++) {
+                let tr = $("<tr>");
+                tr.append($("<td>").append(i+1));
+                tr.append(fillShortMatchPlayerNameRow(data, i));
+                tr.append(fillShortMatchPlayerEloRow(data, i));
+                body.append(tr);
+            }
+            tbl.append(body);
+            $("#ELO").html(tbl).show();
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err );
+            $("#errorMsg-elo")
+                .html("Fetching ELO failed: " + err)
                 .show();
         });
 });
