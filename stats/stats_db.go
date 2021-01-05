@@ -197,6 +197,7 @@ func updateTeamELO(t *Team) (err error) {
 	for _, p := range t.Players {
 		err = updatePlayerELO(p)
 		if err != nil {
+			log.Println("failed to update ELO for", p, ":", err)
 			return
 		}
 	}
@@ -232,7 +233,7 @@ func UpdateELO() (err error) {
 			return
 		}
 		m.UpdateMatchELO()
-		log.Println("elo update for: ", m.ID)
+		log.Println("elo update for:", m.ID)
 		updateTeamELO(m.North)
 		updateTeamELO(m.South)
 	}

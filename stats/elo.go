@@ -35,6 +35,7 @@ func calcChangeELO(playerELO, avgOpponentELO float64, won bool) int {
 func (t *Team) updateTeamELO(avgOpponentELO float64, won bool) {
 	for _, p := range t.Players {
 		d := calcChangeELO(float64(p.ELO), avgOpponentELO, won)
+		log.Printf("elo update: %20s %4d [%+2d]\n", p.Name, p.ELO, d)
 		p.ELO += d
 	}
 }
