@@ -41,6 +41,7 @@ func OpenHTTP(addr string) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.String(http.StatusBadRequest, err.Error())
+			return
 		}
 
 		match, err := stats.QueryMatchShort(id)
@@ -105,6 +106,21 @@ func OpenHTTP(addr string) {
 			Deaths:    deaths,
 			Builders:  builders,
 		})
+	})
+	router.GET("/api/elo/:limit", func(c *gin.Context) {
+		limit, err := strconv.Atoi(c.Param("limit"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		players, err := stats.QueryTopPlayersByELO(limit)
+		if err != nil {
+			// FIXME
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, players)
 	})
 	router.GET("/api/csv/match/all", func(c *gin.Context) {
 		c.Status(http.StatusOK)

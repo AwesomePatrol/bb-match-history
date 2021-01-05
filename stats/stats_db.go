@@ -109,6 +109,11 @@ func QueryPlayerELO(name string) (elo int, err error) {
 	return p.ELO, err
 }
 
+func QueryTopPlayersByELO(limit int) (p []*Player, err error) {
+	err = db.Order("elo desc").Limit(limit).Find(&p).Error
+	return
+}
+
 func countScienceInEvents(timeline []*Event, name string) (cnt int) {
 	// FIXME extremely inefficient, but should be rarely used
 	for _, e := range timeline {
