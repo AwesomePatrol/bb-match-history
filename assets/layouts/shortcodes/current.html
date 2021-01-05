@@ -1,4 +1,23 @@
 <label>
+  Refresh time:
+  <div id="refTime" class="btn-group btn-group-toggle" data-toggle="buttons">
+  <label class="btn btn-secondary active">
+    <input type="radio" name="options" id="ref-off" value="-1" autocomplete="off" checked> off
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="ref-1" value="1" autocomplete="off"> 1m
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="ref-5" value="5" autocomplete="off"> 5m
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="ref-15" value="15" autocomplete="off"> 15m
+  </label>
+  </div>
+  <span id="countdown"></span><span id="countdown_s" style="display: none">s</span>
+</label>
+</br>
+<label>
   Match type:
   <div id="matchType" class="btn-group btn-group-toggle" data-toggle="buttons">
   <label class="btn btn-secondary active">
@@ -20,6 +39,38 @@
 <div style="width: 49%; float:left;" id="spectatorList"></div>
 </div>
 <script>
+
+var countdown = -1;
+
+function doCountdown() {
+    let val = $("#countdown").html();
+    val = val - 1;
+    if (val > 0) {
+        $("#countdown").html(val);
+        return;
+    }
+
+    fetchCurrent();
+
+    // reset
+    val = $("#refTime input[type='radio']:checked").val() * 60;
+    $("#countdown").html(val);
+}
+function setCountdown() {
+    if (countdown != -1) {
+        $("#countdown_s").hide();
+        $("#countdown").hide();
+        clearInterval(countdown);
+    }
+    let interval = $("#refTime input[type='radio']:checked").val();
+    if (interval <= 0) {
+        return
+    }
+    interval = interval * 60;
+    $("#countdown").html(interval).show();
+    $("#countdown_s").show();
+    countdown = setInterval(doCountdown, 1000);
+}
 function checkInTeam(name, team) {
     if (team.Players == null) {
         return false;
@@ -101,5 +152,6 @@ $('#matches').ready(function() {
     fetchCurrent();
 });
 $('#matchType').change(fetchCurrent);
+$('#refTime').change(setCountdown);
 </script>
 
