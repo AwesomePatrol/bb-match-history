@@ -37,6 +37,16 @@ func OpenHTTP(addr string) {
 		}
 		c.JSON(http.StatusOK, matches)
 	})
+	router.GET("/api/player/:name/elo", func(c *gin.Context) {
+		name := c.Param("name")
+		elo, err := stats.QueryPlayerELO(name)
+		if err != nil {
+			// FIXME
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, &stats.Player{Name: name, ELO: elo})
+	})
 	router.GET("/api/match/short/:id", func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
