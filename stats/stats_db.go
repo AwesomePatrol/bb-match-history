@@ -103,6 +103,12 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
+func QueryPlayerELO(name string) (elo int, err error) {
+	p := &Player{}
+	err = db.Where("name = ?", name).First(&p).Error
+	return p.ELO, err
+}
+
 func countScienceInEvents(timeline []*Event, name string) (cnt int) {
 	// FIXME extremely inefficient, but should be rarely used
 	for _, e := range timeline {

@@ -11,6 +11,7 @@ import (
 	"github.com/awesomepatrol/bb-match-history/parser"
 	"github.com/awesomepatrol/bb-match-history/stats"
 	"github.com/bwmarrin/discordgo"
+	"github.com/jinzhu/gorm"
 )
 
 const masterID = "213745524279345152"
@@ -40,6 +41,22 @@ func init() {
 	}
 }
 
+func fillPlayersWithELO(players []*stats.Player) {
+	for _, p := range players {
+		if p.ELO == 0 {
+			elo, err := stats.QueryPlayerELO(p.Name)
+			if err != nil {
+				if err == gorm.ErrRecordNotFound {
+					continue
+				}
+				log.Println("failed to get player's elo:", err)
+				continue
+			}
+			p.ELO = elo
+		}
+	}
+}
+
 func _getCurrentMatch(id string) *stats.Match {
 	mux.Lock()
 	defer mux.Unlock()
@@ -48,6 +65,7 @@ func _getCurrentMatch(id string) *stats.Match {
 	}
 	m := currentMatch[id]
 	parser.FixPlayers(m)
+	fillPlayersWithELO(m.Players)
 	return m
 }
 
