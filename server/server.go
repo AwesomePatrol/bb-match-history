@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -104,6 +105,13 @@ func OpenHTTP(addr string) {
 			Deaths:    deaths,
 			Builders:  builders,
 		})
+	})
+	router.GET("/api/csv/match/all", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+		err := stats.GetMatchWithFeedsAsCSV(c.Writer)
+		if err != nil {
+			log.Println("csv dump failed:", err)
+		}
 	})
 	router.Run(addr)
 }

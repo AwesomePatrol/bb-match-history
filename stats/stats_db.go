@@ -1,8 +1,12 @@
 package stats
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -97,6 +101,78 @@ func QueryMatchAll() (matches []Match, err error) {
 	matches = make([]Match, 0, 128)
 	err = db.Limit(128).Order("start desc").Find(&matches).Error
 	return
+}
+
+func countScienceInEvents(timeline []*Event, name string) (cnt int) {
+	// FIXME extremely inefficient, but should be rarely used
+	for _, e := range timeline {
+		if e.EventType == Feed && strings.Contains(e.Payload, name) {
+			s := strings.Split(e.Payload, " ")
+			if len(s) == 11 {
+				i, err := strconv.Atoi(s[2])
+				if err != nil {
+					log.Println("failed to parse falsk count:", e.Payload)
+					continue
+				}
+				cnt += i
+			}
+		}
+	}
+	return
+}
+
+func intSliceToStringSlice(a []int) (b []string) {
+	b = make([]string, len(a))
+	for i := range a {
+		b[i] = strconv.Itoa(a[i])
+	}
+	return
+}
+
+func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
+	w := csv.NewWriter(writer)
+	matches := make([]Match, 0, 128)
+	err = db.Preload("Players").Order("id asc").Find(&matches).Error
+	if err != nil {
+		return
+	}
+
+	// header
+	record := make([]string, 12)
+	record = []string{"id", "len", "diff", "player_cnt", "north_won",
+		"feed_red", "feed_green", "feed_grey", "feed_blue", "feed_yellow", "feed_purple", "feed_white"}
+	err = w.Write(record)
+	if err != nil {
+		return
+	}
+
+	for _, m := range matches {
+		timeline := make([]*Event, 0, 128)
+		err = db.Where("match_id = ?", m.ID).Find(&timeline).Error
+		if err != nil {
+			return
+		}
+
+		record = intSliceToStringSlice([]int{
+			int(m.ID), int(m.Length), int(m.Difficulty), len(m.Players), 0,
+			countScienceInEvents(timeline, "automation"),
+			countScienceInEvents(timeline, "logistic"),
+			countScienceInEvents(timeline, "military"),
+			countScienceInEvents(timeline, "chemical"),
+			countScienceInEvents(timeline, "production"),
+			countScienceInEvents(timeline, "utility"),
+			countScienceInEvents(timeline, "space"),
+		})
+		if m.NorthWon {
+			record[4] = "1"
+		}
+		err = w.Write(record)
+		if err != nil {
+			return
+		}
+	}
+	w.Flush()
+	return w.Error()
 }
 
 func updatePlayerELO(p *Player) (err error) {
