@@ -189,7 +189,7 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 }
 
 func updatePlayerELO(p *Player) (err error) {
-	err = db.Model(p).Update("ELO", p.ELO).Error
+	err = db.Model(&Player{}).Where("name = ?", p.Name).Update("ELO", p.ELO).Error
 	return
 }
 
