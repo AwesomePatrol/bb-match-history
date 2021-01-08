@@ -105,10 +105,10 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
-func QueryPlayerELO(name string) (elo int, err error) {
-	p := &Player{}
-	err = db.Where("name = ?", name).First(&p).Error
-	return p.ELO, err
+func QueryPlayerDetails(name string) (p *Player, err error) {
+	p = new(Player)
+	err = db.Where("name = ?", name).First(p).Error
+	return p, err
 }
 
 func QueryTopPlayersByELO(limit int) (p []*Player, err error) {
