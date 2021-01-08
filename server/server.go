@@ -39,7 +39,7 @@ func OpenHTTP(addr string) {
 	})
 	router.GET("/api/player/:name/details", func(c *gin.Context) {
 		name := c.Param("name")
-		p, err := stats.QueryPlayerDetails(name)
+		p, err := stats.QueryPlayerByName(name)
 		if err != nil {
 			// FIXME
 			c.String(http.StatusNotFound, err.Error())

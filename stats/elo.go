@@ -63,7 +63,7 @@ func (m *Match) UpdateMatchELO() {
 func FillPlayersWithELO(players []*Player) {
 	for _, p := range players {
 		if p.ELO == 0 {
-			qp, err := QueryPlayerDetails(p.Name)
+			qp, err := QueryPlayerByName(p.Name)
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
 					continue

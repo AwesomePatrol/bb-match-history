@@ -105,7 +105,7 @@ func QueryMatchAll() (matches []Match, err error) {
 	return
 }
 
-func QueryPlayerDetails(name string) (p *Player, err error) {
+func QueryPlayerByName(name string) (p *Player, err error) {
 	p = new(Player)
 	err = db.Where("name = ?", name).First(p).Error
 	return p, err
