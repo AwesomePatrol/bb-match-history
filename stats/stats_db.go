@@ -44,6 +44,7 @@ func InsertMatch(match *Match) error {
 	}
 
 	// Calculate ELO and update player's ELO values in db.
+	FillPlayersWithELO(match.Players)
 	FillPlayersWithELO(match.North.Players)
 	FillPlayersWithELO(match.South.Players)
 	match.UpdateMatchELO()

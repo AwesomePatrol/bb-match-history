@@ -48,6 +48,7 @@ func _getCurrentMatch(id string) *stats.Match {
 	}
 	m := currentMatch[id]
 	parser.FixPlayers(m)
+	stats.FillPlayersWithELO(m.Players)
 	stats.FillPlayersWithELO(m.North.Players)
 	stats.FillPlayersWithELO(m.South.Players)
 	return m
