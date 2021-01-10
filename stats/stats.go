@@ -5,21 +5,15 @@ import (
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/awesomepatrol/bb-match-history/stats/const/science"
 )
 
 type Model struct {
-	ID        uint       `gorm:"primary_key"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `sql:"index" json:"-"`
+	ID uint `gorm:"primary_key"`
 }
 
 type EmptyModel struct {
-	ID        uint       `gorm:"primary_key" json:"-"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `sql:"index" json:"-"`
+	ID uint `gorm:"primary_key" json:"-"`
 }
 
 type Player struct {
@@ -131,6 +125,7 @@ type PlayerMatch struct {
 	EmptyModel
 	Match     *Match
 	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
+	FlasksFed science.Feed
 	BeforeELO int
 	GainELO   int
 }

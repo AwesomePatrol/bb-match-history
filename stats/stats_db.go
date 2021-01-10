@@ -8,15 +8,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
 func OpenDB(path string) {
 	var err error
-	db, err = gorm.Open("sqlite3", path)
+	db, err = gorm.Open(sqlite.Open(path), &gorm.Config{
+		PrepareStmt: true,
+	})
 	if err != nil {
 		panic(fmt.Sprint("failed to connect database:", err))
 	}
@@ -31,7 +33,12 @@ func OpenDB(path string) {
 }
 
 func CloseDB() {
-	db.Close()
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Println("failed to get DB interface:", err)
+	}
+	// Might as weel try it.
+	sqlDB.Close()
 }
 
 func InsertMatch(match *Match) error {
@@ -39,7 +46,7 @@ func InsertMatch(match *Match) error {
 		log.Println("skipping empty match:", match)
 		return nil
 	}
-	var n int
+	var n int64
 	db.Where("start = ?", match.Start).Find(new(Match)).Count(&n)
 	if n > 0 {
 		return fmt.Errorf("already in db")
@@ -69,13 +76,13 @@ func queryMatchShort(id int) (match *Match, err error) {
 	}
 
 	match.North = new(Team)
-	err = matchDB.Where("is_north = ?", true).Related(&match.North).Error
+	err = matchDB.Where("is_north = ?", true).Where("team_id = ?", match.ID).First(match.North).Error
 	if err != nil {
 		return nil, err
 	}
 
 	match.South = new(Team)
-	err = matchDB.Where("is_north = ?", false).Related(&match.South).Error
+	err = matchDB.Where("is_north = ?", false).Where("team_id = ?", match.ID).First(match.South).Error
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ func TestParseSingleMatch(t *testing.T) {
 	for _, event := range match.Timeline {
 		t.Log(event)
 	}
-	t.Log("winner:", match.NorthWon)
+	t.Log("winner:", match.Winner)
 	t.Log(match.Length)
 	t.Log(match.Difficulty)
 	res, _ := json.Marshal(match)
