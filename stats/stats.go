@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -86,28 +87,6 @@ type Event struct {
 	MatchID int64 `json:"-"`
 }
 
-type Difficulty int64
-
-const (
-	Peaceful Difficulty = iota
-	PieceOfCake
-	Easy
-	Normal
-	Hard
-	Nightmare
-	UltraViolence
-	FunAndFast
-)
-
-func (p *Difficulty) Scan(value interface{}) error {
-	*p = Difficulty(value.(int64))
-	return nil
-}
-
-func (p Difficulty) Value() (string, error) {
-	return fmt.Sprint(p), nil
-}
-
 type Match struct {
 	Model
 	Players      []*Player `gorm:"many2many:player_match;" json:",omitempty"`
@@ -116,12 +95,19 @@ type Match struct {
 	End          time.Time `json:",omitempty"`
 	Length       time.Duration
 	NorthWon     bool
-	Difficulty   `sql:"type:difficulty"`
-	Timeline     []*Event `gorm:"foreignkey:MatchID" json:",omitempty"`
-	IsWinner     *bool    `json:",omitempty"`
-	ChannelID    string   `json:"-"`
+	Difficulty   difficulty.Difficulty `sql:"type:difficulty"`
+	Timeline     []*Event              `gorm:"foreignkey:MatchID" json:",omitempty"`
+	IsWinner     *bool                 `json:",omitempty"`
+	ChannelID    string                `json:"-"`
 }
 
 func (m *Match) String() string {
 	return fmt.Sprintf("start: %v end: %v difficulty: %d players: %d", m.Start, m.End, m.Difficulty, len(m.Players))
+}
+
+type PlayerMatch struct {
+	EmptyModel
+	Match     *Match `gorm:"foreignkey:MatchID"`
+	BeforeELO int
+	GainELO   int
 }

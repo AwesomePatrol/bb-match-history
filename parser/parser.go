@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/stats"
+	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
 )
 
 func makeUnique(players []*stats.Player) []*stats.Player {
@@ -34,7 +35,7 @@ func NewMatch() (match *stats.Match) {
 	match.South.IsNorth = false
 	match.North.IsNorth = true
 	match.Start = time.Now().UTC()
-	match.Difficulty = stats.Normal
+	match.Difficulty = difficulty.Normal
 	return
 }
 
@@ -125,36 +126,15 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 	fixStartEnd(match, t)
 	switch {
 	case strings.HasPrefix(line, ">> Map difficulty has changed to"):
-		var diffConst stats.Difficulty
-
-		difficulty := strings.Replace(
+		difficultyStr := strings.Replace(
 			strings.Replace(line, ">> Map difficulty has changed to ", "", -1),
 			" difficulty!", "", -1)
 
 		// TODO: keep it in a map?
-		switch difficulty {
-		case "Peaceful": // 1
-			fallthrough
-		case "I'm Too Young to Die":
-			diffConst = stats.Peaceful
-		case "Piece of Cake": // 2
-			diffConst = stats.PieceOfCake
-		case "Easy": // 3
-			diffConst = stats.Easy
-		case "Normal": // 4
-			diffConst = stats.Normal
-		case "Hard": // 5
-			diffConst = stats.Hard
-		case "Nightmare": // 6
-			diffConst = stats.Nightmare
-		case "Ultra-Violence": // 7
-			diffConst = stats.UltraViolence
-		case "Insane": // 8
-			fallthrough
-		case "Fun and Fast":
-			diffConst = stats.FunAndFast
-		default:
-			log.Println("unknown difficulty:", difficulty)
+		diffConst, err := difficulty.StringToDifficulty(difficultyStr)
+		if err != nil {
+			log.Println("failed to convert:", difficultyStr, err)
+			return false
 		}
 		match.Difficulty = diffConst
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.DifficultyChange, Payload: line, Timestamp: t})
