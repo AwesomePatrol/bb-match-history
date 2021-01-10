@@ -25,7 +25,7 @@ type EmptyModel struct {
 type Player struct {
 	Name    string `gorm:"PRIMARY_KEY"`
 	ELO     int
-	History []Match `gorm:"many2many:player_match;" json:"-"`
+	History []PlayerMatch `gorm:"many2many:player_match;" json:"-"`
 }
 
 type Channel struct {
@@ -50,8 +50,9 @@ type Team struct {
 	EmptyModel
 	Players []*Player    `gorm:"many2many:player_team;"`
 	MVPs    []*MVPplayer `gorm:"many2many:mvp_team;" json:",omitempty"`
-	IsNorth bool         `json:"-"`
-	MatchID int64        `json:"-"`
+	AvgELO  int
+	IsNorth bool  `json:"-"`
+	MatchID int64 `json:"-"`
 }
 
 type EventType int64
@@ -97,7 +98,6 @@ type Match struct {
 	NorthWon     bool
 	Difficulty   difficulty.Difficulty `sql:"type:difficulty"`
 	Timeline     []*Event              `gorm:"foreignkey:MatchID" json:",omitempty"`
-	IsWinner     *bool                 `json:",omitempty"`
 	ChannelID    string                `json:"-"`
 }
 
@@ -107,7 +107,9 @@ func (m *Match) String() string {
 
 type PlayerMatch struct {
 	EmptyModel
-	Match     *Match `gorm:"foreignkey:MatchID"`
+	Players   *Player `gorm:"many2many:player_match;"`
+	Match     *Match  `gorm:"foreignkey:MatchID"`
+	IsWinner  *bool   // IsWinner is a pointer to indicate situtation when player is just a spectator.
 	BeforeELO int
 	GainELO   int
 }

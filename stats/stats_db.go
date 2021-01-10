@@ -26,6 +26,7 @@ func OpenDB(path string) {
 	db.AutoMigrate(&Team{})
 	db.AutoMigrate(&Channel{})
 	db.AutoMigrate(&Match{})
+	db.AutoMigrate(&PlayerMatch{})
 }
 
 func CloseDB() {
@@ -250,9 +251,9 @@ func (team *Team) IsPlayerInTeam(name string) bool {
 	return false
 }
 
-func QueryPlayerMatches(name string) ([]Match, error) {
+func QueryPlayerMatches(name string) ([]PlayerMatch, error) {
 	player := Player{Name: name}
-	err := db.Preload("History", func(db *gorm.DB) *gorm.DB {
+	err := db.Preload("History.Match").Preload("History", func(db *gorm.DB) *gorm.DB {
 		return db.Order("matches.start DESC")
 	}).First(&player).Error
 	if err != nil {
@@ -263,12 +264,12 @@ func QueryPlayerMatches(name string) ([]Match, error) {
 	var trueV = true
 	for i, match := range player.History {
 		var teamW Team
-		err = db.Preload("Players").Where("is_north = ?", match.NorthWon).Where("match_id = ?", match.ID).First(&teamW).Error
+		err = db.Preload("Players").Where("is_north = ?", match.Match.NorthWon).Where("match_id = ?", match.Match.ID).First(&teamW).Error
 		if err != nil {
 			return nil, err
 		}
 		var teamL Team
-		err = db.Preload("Players").Where("is_north = ?", !match.NorthWon).Where("match_id = ?", match.ID).First(&teamL).Error
+		err = db.Preload("Players").Where("is_north = ?", !match.Match.NorthWon).Where("match_id = ?", match.Match.ID).First(&teamL).Error
 		if err != nil {
 			return nil, err
 		}
