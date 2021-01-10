@@ -56,8 +56,8 @@ func (m *Match) UpdateMatchELO() {
 		return
 	}
 	southAvg, northAvg := m.South.getAvgELO(), m.North.getAvgELO()
-	m.North.updateTeamELO(southAvg, m.NorthWon)
-	m.South.updateTeamELO(northAvg, !m.NorthWon)
+	m.North.updateTeamELO(southAvg, m.Winner == North)
+	m.South.updateTeamELO(northAvg, m.Winner == South)
 }
 
 func FillPlayersWithELO(players []*Player) {

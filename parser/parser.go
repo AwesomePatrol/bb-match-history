@@ -149,9 +149,9 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 	case strings.Contains(line, "has won"):
 		switch {
 		case strings.Contains(line, "South has won"):
-			match.NorthWon = false
+			match.Winner = stats.South
 		case strings.Contains(line, "North has won"):
-			match.NorthWon = true
+			match.Winner = stats.North
 		default:
 			log.Println("err: unknown team:", line)
 		}

@@ -28,6 +28,11 @@ type Player struct {
 	History []PlayerMatch `gorm:"many2many:player_match;" json:"-"`
 }
 
+type GamePlayer struct {
+	Player
+	Force Force
+}
+
 type Channel struct {
 	ID      string  `gorm:"PRIMARY_KEY"`
 	History []Match `gorm:"foreignkey:ChannelID"`
@@ -80,6 +85,23 @@ func (p EventType) Value() (string, error) {
 	return fmt.Sprint(p), nil
 }
 
+type Force int64
+
+const (
+	Spectator Force = iota
+	North
+	South
+)
+
+func (p *Force) Scan(value interface{}) error {
+	*p = Force(value.(int64))
+	return nil
+}
+
+func (p Force) Value() (string, error) {
+	return fmt.Sprint(p), nil
+}
+
 type Event struct {
 	EmptyModel
 	Timestamp time.Time
@@ -95,7 +117,7 @@ type Match struct {
 	Start        time.Time `gorm:"UNIQUE" json:",omitempty"`
 	End          time.Time `json:",omitempty"`
 	Length       time.Duration
-	NorthWon     bool
+	Winner       Force
 	Difficulty   difficulty.Difficulty `sql:"type:difficulty"`
 	Timeline     []*Event              `gorm:"foreignkey:MatchID" json:",omitempty"`
 	ChannelID    string                `json:"-"`
@@ -107,9 +129,8 @@ func (m *Match) String() string {
 
 type PlayerMatch struct {
 	EmptyModel
-	Players   *Player `gorm:"many2many:player_match;"`
-	Match     *Match  `gorm:"foreignkey:MatchID"`
-	IsWinner  *bool   // IsWinner is a pointer to indicate situtation when player is just a spectator.
+	Match     *Match
+	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
 	BeforeELO int
 	GainELO   int
 }

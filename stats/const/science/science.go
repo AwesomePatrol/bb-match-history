@@ -14,6 +14,8 @@ const (
 	Space
 )
 
+type Feed [7]int
+
 func (p *Science) Scan(value interface{}) error {
 	*p = Science(value.(int64))
 	return nil

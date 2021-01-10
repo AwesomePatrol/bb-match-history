@@ -27,6 +27,7 @@ func OpenDB(path string) {
 	db.AutoMigrate(&Channel{})
 	db.AutoMigrate(&Match{})
 	db.AutoMigrate(&PlayerMatch{})
+	db.AutoMigrate("player_match")
 }
 
 func CloseDB() {
@@ -169,7 +170,7 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 		}
 
 		record = intSliceToStringSlice([]int{
-			int(m.ID), int(m.Length), int(m.Difficulty), len(m.Players), 0,
+			int(m.ID), int(m.Length), int(m.Difficulty), len(m.Players), int(m.Winner),
 			countScienceInEvents(timeline, "automation"),
 			countScienceInEvents(timeline, "logistic"),
 			countScienceInEvents(timeline, "military"),
@@ -178,9 +179,6 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 			countScienceInEvents(timeline, "utility"),
 			countScienceInEvents(timeline, "space"),
 		})
-		if m.NorthWon {
-			record[4] = "1"
-		}
 		err = w.Write(record)
 		if err != nil {
 			return
@@ -264,12 +262,12 @@ func QueryPlayerMatches(name string) ([]PlayerMatch, error) {
 	var trueV = true
 	for i, match := range player.History {
 		var teamW Team
-		err = db.Preload("Players").Where("is_north = ?", match.Match.NorthWon).Where("match_id = ?", match.Match.ID).First(&teamW).Error
+		err = db.Preload("Players").Where("is_north = ?", match.Match.Winner == North).Where("match_id = ?", match.Match.ID).First(&teamW).Error
 		if err != nil {
 			return nil, err
 		}
 		var teamL Team
-		err = db.Preload("Players").Where("is_north = ?", !match.Match.NorthWon).Where("match_id = ?", match.Match.ID).First(&teamL).Error
+		err = db.Preload("Players").Where("is_north = ?", match.Match.Winner == South).Where("match_id = ?", match.Match.ID).First(&teamL).Error
 		if err != nil {
 			return nil, err
 		}
