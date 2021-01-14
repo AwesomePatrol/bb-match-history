@@ -126,7 +126,6 @@ type PlayerMatch struct {
 	EmptyModel
 	Match     *Match `gorm:"-"`
 	IsWinner  *bool  // IsWinner is a pointer to indicate situtation when player is just a spectator.
-	FlasksFed science.Feed
 	BeforeELO int
 	GainELO   int
 }
