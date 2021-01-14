@@ -6,7 +6,6 @@ import (
 )
 
 func TestInsertMatch(t *testing.T) {
-	t.Skip()
 	testdata := new(Match)
 	err := json.Unmarshal([]byte(exampleJSON1), testdata)
 	if err != nil {

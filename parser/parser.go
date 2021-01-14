@@ -34,6 +34,8 @@ func NewMatch() (match *stats.Match) {
 	match.North = new(stats.Team)
 	match.South.IsNorth = false
 	match.North.IsNorth = true
+	match.South.TotalFeed = make([]int32, 7)
+	match.North.TotalFeed = make([]int32, 7)
 	match.Start = time.Now().UTC()
 	match.Difficulty = difficulty.Normal
 	return

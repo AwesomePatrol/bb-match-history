@@ -1,6 +1,11 @@
 package science
 
-import "fmt"
+import (
+	"database/sql/driver"
+	"fmt"
+
+	"github.com/lib/pq"
+)
 
 type Science int64
 
@@ -14,8 +19,6 @@ const (
 	Space
 )
 
-type Feed [7]int
-
 func (p *Science) Scan(value interface{}) error {
 	*p = Science(value.(int64))
 	return nil
@@ -23,4 +26,14 @@ func (p *Science) Scan(value interface{}) error {
 
 func (p Science) Value() (string, error) {
 	return fmt.Sprint(p), nil
+}
+
+type Feed []int32
+
+func (p *Feed) Scan(value interface{}) error {
+	return pq.Array(p).Scan(value)
+}
+
+func (p Feed) Value() (driver.Value, error) {
+	return pq.Array(p).Value()
 }

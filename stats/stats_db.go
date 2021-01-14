@@ -29,7 +29,6 @@ func OpenDB(path string) {
 	db.AutoMigrate(&Channel{})
 	db.AutoMigrate(&Match{})
 	db.AutoMigrate(&PlayerMatch{})
-	db.AutoMigrate("player_match")
 }
 
 func CloseDB() {
@@ -70,19 +69,19 @@ func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
 
 func queryMatchShort(id int) (match *Match, err error) {
 	match = new(Match)
-	matchDB := db.Preload("Players").First(match, id)
-	if matchDB.Error != nil {
-		return nil, matchDB.Error
+	db.Preload("Players").First(match, id)
+	if db.Error != nil {
+		return nil, db.Error
 	}
 
 	match.North = new(Team)
-	err = matchDB.Where("is_north = ?", true).Where("team_id = ?", match.ID).First(match.North).Error
+	err = db.Preload("Players").Where("is_north = ?", true).Where("match_id = ?", match.ID).First(match.North).Error
 	if err != nil {
 		return nil, err
 	}
 
 	match.South = new(Team)
-	err = matchDB.Where("is_north = ?", false).Where("team_id = ?", match.ID).First(match.South).Error
+	err = db.Preload("Players").Where("is_north = ?", false).Where("match_id = ?", match.ID).First(match.South).Error
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +255,7 @@ func (team *Team) IsPlayerInTeam(name string) bool {
 	return false
 }
 
-func QueryPlayerMatches(name string) ([]PlayerMatch, error) {
+func QueryPlayerMatches(name string) ([]Match, error) {
 	player := Player{Name: name}
 	err := db.Preload("History.Match").Preload("History", func(db *gorm.DB) *gorm.DB {
 		return db.Order("matches.start DESC")
@@ -265,27 +264,18 @@ func QueryPlayerMatches(name string) ([]PlayerMatch, error) {
 		return nil, err
 	}
 
-	var falseV = false
-	var trueV = true
-	for i, match := range player.History {
+	for _, match := range player.History {
 		var teamW Team
-		err = db.Preload("Players").Where("is_north = ?", match.Match.Winner == North).Where("match_id = ?", match.Match.ID).First(&teamW).Error
+		err = db.Preload("Players").Where("is_north = ?", match.Winner == North).Where("match_id = ?", match.ID).First(&teamW).Error
 		if err != nil {
 			return nil, err
 		}
 		var teamL Team
-		err = db.Preload("Players").Where("is_north = ?", match.Match.Winner == South).Where("match_id = ?", match.Match.ID).First(&teamL).Error
+		err = db.Preload("Players").Where("is_north = ?", match.Winner == South).Where("match_id = ?", match.ID).First(&teamL).Error
 		if err != nil {
 			return nil, err
 		}
-		switch {
-		case teamW.IsPlayerInTeam(name):
-			player.History[i].IsWinner = &trueV
-		case teamL.IsPlayerInTeam(name):
-			player.History[i].IsWinner = &falseV
-		default:
-			player.History[i].IsWinner = nil
-		}
+		// TODO: convert to PlayerMatch
 	}
 	return player.History, nil
 }

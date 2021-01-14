@@ -9,17 +9,17 @@ import (
 )
 
 type Model struct {
-	ID uint `gorm:"primary_key"`
+	ID uint `gorm:"primaryKey"`
 }
 
 type EmptyModel struct {
-	ID uint `gorm:"primary_key" json:"-"`
+	ID uint `gorm:"primaryKey" json:"-"`
 }
 
 type Player struct {
 	Name    string `gorm:"PRIMARY_KEY"`
 	ELO     int
-	History []PlayerMatch `gorm:"many2many:player_match;" json:"-"`
+	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
 type GamePlayer struct {
@@ -47,11 +47,12 @@ type MVPplayer struct {
 
 type Team struct {
 	EmptyModel
-	Players []*Player    `gorm:"many2many:player_team;"`
-	MVPs    []*MVPplayer `gorm:"many2many:mvp_team;" json:",omitempty"`
-	AvgELO  int
-	IsNorth bool  `json:"-"`
-	MatchID int64 `json:"-"`
+	Players   []*Player    `gorm:"many2many:player_team;"`
+	MVPs      []*MVPplayer `gorm:"many2many:mvp_team;" json:",omitempty"`
+	AvgELO    int
+	TotalFeed science.Feed `gorm:"type:integer[]"`
+	IsNorth   bool         `gorm:"type:bool" json:"-"`
+	MatchID   int64        `json:"-"`
 }
 
 type EventType int64
@@ -99,9 +100,9 @@ func (p Force) Value() (string, error) {
 type Event struct {
 	EmptyModel
 	Timestamp time.Time
-	EventType
-	Payload string
-	MatchID int64 `json:"-"`
+	EventType EventType
+	Payload   string
+	MatchID   int64 `json:"-"`
 }
 
 type Match struct {
@@ -123,8 +124,8 @@ func (m *Match) String() string {
 
 type PlayerMatch struct {
 	EmptyModel
-	Match     *Match
-	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
+	Match     *Match `gorm:"-"`
+	IsWinner  *bool  // IsWinner is a pointer to indicate situtation when player is just a spectator.
 	FlasksFed science.Feed
 	BeforeELO int
 	GainELO   int
