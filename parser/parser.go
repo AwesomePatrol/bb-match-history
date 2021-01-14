@@ -184,8 +184,11 @@ func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) 
 		log.Println("unknown team name:", teamName)
 		return
 	}
+	if findInTeam(team.Players, player.Name) != nil {
+		log.Println("player already linked to team:", player.Name)
+		return
+	}
 	team.Players = append(team.Players, player)
-	match.Players = append(match.Players, player)
 }
 
 func ParseLine(match *stats.Match, line string, t time.Time) {
