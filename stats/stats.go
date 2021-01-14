@@ -17,14 +17,16 @@ type EmptyModel struct {
 }
 
 type Player struct {
-	Name    string `gorm:"PRIMARY_KEY"`
+	EmptyModel
+	Name    string
 	ELO     int
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
 type GamePlayer struct {
 	Player
-	Force Force
+	Force   Force
+	MatchID int64 `json:"-"`
 }
 
 type Channel struct {
@@ -124,6 +126,8 @@ func (m *Match) String() string {
 
 type PlayerMatch struct {
 	EmptyModel
+	PlayerID  int64  `json:"-"`
+	MatchID   int64  `json:"-"`
 	Match     *Match `gorm:"-"`
 	IsWinner  *bool  // IsWinner is a pointer to indicate situtation when player is just a spectator.
 	BeforeELO int
