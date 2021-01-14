@@ -24,7 +24,8 @@ type Player struct {
 }
 
 type GamePlayer struct {
-	Player
+	EmptyModel
+	Name      string `gorm:"unique"`
 	Force     Force
 	MatchID   int64 `json:"-"`
 	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
@@ -54,7 +55,7 @@ type Team struct {
 	EmptyModel
 	Players   []*GamePlayer `gorm:"many2many:player_team;"`
 	MVPs      []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
-	AvgELO    int
+	AvgELO    float64
 	TotalFeed science.Feed `gorm:"type:integer[]"`
 	IsNorth   bool         `gorm:"type:bool" json:"-"`
 	MatchID   int64        `json:"-"`

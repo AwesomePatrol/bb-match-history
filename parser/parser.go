@@ -205,7 +205,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		}
 		// TODO: skip/update already present
 		// TODO: get db id
-		match.Players = append(match.Players, &stats.GamePlayer{Player: stats.Player{Name: name}, Force: stats.Spectator})
+		match.Players = append(match.Players, &stats.GamePlayer{Name: name, Force: stats.Spectator})
 		eventType = stats.JoinGame
 	case strings.HasSuffix(line, "has left the game"):
 		var name string

@@ -200,16 +200,11 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 	return w.Error()
 }
 
-func updatePlayerELO(p *Player) (err error) {
-	err = db.Model(&Player{}).Where("name = ?", p.Name).Update("ELO", p.ELO).Error
-	return
-}
-
 func updateTeamELO(t *Team) (err error) {
 	for _, p := range t.Players {
-		err = updatePlayerELO(&p.Player)
-		if err != nil {
-			log.Println("failed to update ELO for", p, ":", err)
+		db.Model(&Player{}).Where("name = ?", p.Name).Update("ELO", p.BeforeELO+p.GainELO)
+		if db.Error != nil {
+			log.Println("failed to update ELO for", p.Name, ":", err)
 			return
 		}
 	}

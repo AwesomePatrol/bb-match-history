@@ -34,19 +34,19 @@ func calcChangeELO(playerELO, avgOpponentELO float64, won bool) int {
 
 func (t *Team) updateTeamELO(avgOpponentELO float64, won bool) {
 	for _, p := range t.Players {
-		d := calcChangeELO(float64(p.ELO), avgOpponentELO, won)
-		log.Printf("elo update: %20s %4d [%+2d]\n", p.Name, p.ELO, d)
-		p.ELO += d
+		d := calcChangeELO(float64(p.BeforeELO), avgOpponentELO, won)
+		log.Printf("elo update: %20s %4d [%+2d]\n", p.Name, p.BeforeELO, d)
+		p.GainELO = d
 	}
 }
 
-func (t *Team) getAvgELO() float64 {
+func (t *Team) setAvgELO() float64 {
 	sum := 0
 	for _, p := range t.Players {
-		if p.ELO == 0 {
-			p.ELO = startELO
+		if p.BeforeELO == 0 {
+			p.BeforeELO = startELO
 		}
-		sum += p.ELO
+		sum += p.BeforeELO
 	}
 	return float64(sum) / float64(len(t.Players)) // smaller error
 }
@@ -55,14 +55,13 @@ func (m *Match) UpdateMatchELO() {
 	if len(m.South.Players) == 0 || len(m.North.Players) == 0 { // Don't update 1 v nothing
 		return
 	}
-	southAvg, northAvg := m.South.getAvgELO(), m.North.getAvgELO()
-	m.North.updateTeamELO(southAvg, m.Winner == North)
-	m.South.updateTeamELO(northAvg, m.Winner == South)
+	m.North.updateTeamELO(m.South.AvgELO, m.Winner == North)
+	m.South.updateTeamELO(m.North.AvgELO, m.Winner == South)
 }
 
 func FillPlayersWithELO(players []*GamePlayer) {
 	for _, p := range players {
-		if p.ELO == 0 {
+		if p.BeforeELO == 0 {
 			qp, err := QueryPlayerByName(p.Name)
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
@@ -71,7 +70,7 @@ func FillPlayersWithELO(players []*GamePlayer) {
 				log.Println("failed to get player's elo:", err)
 				continue
 			}
-			p.ELO = qp.ELO
+			p.BeforeELO = qp.ELO
 		}
 	}
 }
