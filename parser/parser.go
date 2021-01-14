@@ -5,28 +5,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/stats"
 	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
 )
-
-func makeUnique(players []*stats.Player) []*stats.Player {
-	// FIXME it shouldn't be needed
-	m := make(map[string]*stats.Player)
-	for _, p := range players {
-		m[p.Name] = p
-	}
-	iter := 0
-	for _, p := range m {
-		players[iter] = p
-		iter++
-	}
-	sort.Slice(players[:iter], func(i, j int) bool { return players[i].Name < players[j].Name })
-	return players[:iter]
-}
 
 func NewMatch() (match *stats.Match) {
 	match = new(stats.Match)
@@ -58,14 +42,7 @@ func ParseSingleMatch(reader io.Reader) (*stats.Match, error) {
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	FixPlayers(match)
 	return match, nil
-}
-
-func FixPlayers(match *stats.Match) {
-	match.Players = makeUnique(match.Players)
-	match.North.Players = makeUnique(match.North.Players)
-	match.South.Players = makeUnique(match.South.Players)
 }
 
 func ParseMVP(match *stats.Match, content string) {
@@ -185,13 +162,24 @@ func removeFromTeam(name string, team *stats.Team) bool {
 	return false
 }
 
-func processJoin(match *stats.Match, teamName string, player *stats.Player) {
+func findInTeam(players []*stats.GamePlayer, name string) *stats.GamePlayer {
+	for _, p := range players {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
+}
+
+func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) {
 	var team *stats.Team
 	switch teamName {
 	case "north":
 		team = match.North
+		player.Force = stats.North
 	case "south":
 		team = match.South
+		player.Force = stats.South
 	default:
 		log.Println("unknown team name:", teamName)
 		return
@@ -213,7 +201,8 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			return
 		}
 		// TODO: skip/update already present
-		match.Players = append(match.Players, &stats.Player{Name: name})
+		// TODO: get db id
+		match.Players = append(match.Players, &stats.GamePlayer{Player: stats.Player{Name: name}, Force: stats.Spectator})
 		eventType = stats.JoinGame
 	case strings.HasSuffix(line, "has left the game"):
 		var name string
@@ -232,7 +221,14 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			return
 		}
 		teamName = strings.ReplaceAll(teamName, "!", "")
-		processJoin(match, teamName, &stats.Player{Name: name})
+
+		p := findInTeam(match.Players, name)
+		if p == nil {
+			log.Println("player not found")
+			// TODO: add
+			return
+		}
+		processJoin(match, teamName, p)
 		eventType = stats.JoinTeam
 	case strings.Contains(line, " was killed "):
 		eventType = stats.PlayerDeath
@@ -254,7 +250,13 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			log.Println("failed to parse no spectate:", err)
 			return
 		}
-		processJoin(match, teamName, &stats.Player{Name: name})
+		p := findInTeam(match.Players, name)
+		if p == nil {
+			log.Println("player not found")
+			// TODO: add
+			return
+		}
+		processJoin(match, teamName, p)
 		eventType = stats.JoinTeam
 	case strings.Contains(line, " flasks of "):
 		var teamName, name, scienceName string

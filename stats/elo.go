@@ -60,7 +60,7 @@ func (m *Match) UpdateMatchELO() {
 	m.South.updateTeamELO(northAvg, m.Winner == South)
 }
 
-func FillPlayersWithELO(players []*Player) {
+func FillPlayersWithELO(players []*GamePlayer) {
 	for _, p := range players {
 		if p.ELO == 0 {
 			qp, err := QueryPlayerByName(p.Name)

@@ -28,7 +28,6 @@ func OpenDB(path string) {
 	db.AutoMigrate(&Team{})
 	db.AutoMigrate(&Channel{})
 	db.AutoMigrate(&Match{})
-	db.AutoMigrate(&PlayerMatch{})
 }
 
 func CloseDB() {
@@ -45,6 +44,7 @@ func InsertMatch(match *Match) error {
 		log.Println("skipping empty match:", match)
 		return nil
 	}
+	// TODO: use a transaction?
 	var n int64
 	db.Where("start = ?", match.Start).Find(new(Match)).Count(&n)
 	if n > 0 {
@@ -59,7 +59,13 @@ func InsertMatch(match *Match) error {
 	updateTeamELO(match.North)
 	updateTeamELO(match.South)
 
-	return db.Create(match).Error
+	db.Create(match)
+
+	if db.Error != nil {
+		return db.Error
+	}
+
+	return nil
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
@@ -201,7 +207,7 @@ func updatePlayerELO(p *Player) (err error) {
 
 func updateTeamELO(t *Team) (err error) {
 	for _, p := range t.Players {
-		err = updatePlayerELO(p)
+		err = updatePlayerELO(&p.Player)
 		if err != nil {
 			log.Println("failed to update ELO for", p, ":", err)
 			return

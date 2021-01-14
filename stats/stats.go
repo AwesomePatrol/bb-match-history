@@ -18,15 +18,18 @@ type EmptyModel struct {
 
 type Player struct {
 	EmptyModel
-	Name    string
+	Name    string `gorm:"unique"`
 	ELO     int
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
 type GamePlayer struct {
 	Player
-	Force   Force
-	MatchID int64 `json:"-"`
+	Force     Force
+	MatchID   int64 `json:"-"`
+	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
+	BeforeELO int
+	GainELO   int
 }
 
 type Channel struct {
@@ -49,8 +52,8 @@ type MVPplayer struct {
 
 type Team struct {
 	EmptyModel
-	Players   []*Player    `gorm:"many2many:player_team;"`
-	MVPs      []*MVPplayer `gorm:"many2many:mvp_team;" json:",omitempty"`
+	Players   []*GamePlayer `gorm:"many2many:player_team;"`
+	MVPs      []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
 	AvgELO    int
 	TotalFeed science.Feed `gorm:"type:integer[]"`
 	IsNorth   bool         `gorm:"type:bool" json:"-"`
@@ -109,10 +112,10 @@ type Event struct {
 
 type Match struct {
 	Model
-	Players      []*Player `gorm:"many2many:player_match;" json:",omitempty"`
-	South, North *Team     `gorm:"foreignkey:MatchID" json:",omitempty"`
-	Start        time.Time `gorm:"UNIQUE" json:",omitempty"`
-	End          time.Time `json:",omitempty"`
+	Players      []*GamePlayer `gorm:"many2many:player_match;" json:",omitempty"`
+	South, North *Team         `gorm:"foreignkey:MatchID" json:",omitempty"`
+	Start        time.Time     `gorm:"UNIQUE" json:",omitempty"`
+	End          time.Time     `json:",omitempty"`
 	Length       time.Duration
 	Winner       Force
 	Difficulty   difficulty.Difficulty `sql:"type:difficulty"`
@@ -122,14 +125,4 @@ type Match struct {
 
 func (m *Match) String() string {
 	return fmt.Sprintf("start: %v end: %v difficulty: %d players: %d", m.Start, m.End, m.Difficulty, len(m.Players))
-}
-
-type PlayerMatch struct {
-	EmptyModel
-	PlayerID  int64  `json:"-"`
-	MatchID   int64  `json:"-"`
-	Match     *Match `gorm:"-"`
-	IsWinner  *bool  // IsWinner is a pointer to indicate situtation when player is just a spectator.
-	BeforeELO int
-	GainELO   int
 }
