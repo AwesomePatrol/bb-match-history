@@ -202,26 +202,10 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 	switch {
 	case strings.HasSuffix(line, "has joined the game"):
 		// Not posted to discord on Raven's server
-		var name string
-		_, err := fmt.Sscanf(line, "%s has joined the game", &name)
-		if err != nil {
-			log.Println("failed to parse game join:", err)
-			return
-		}
-		// TODO: skip/update already present
-		// TODO: get db id
-		match.Players = append(match.Players, &stats.GamePlayer{Name: name, Force: stats.Spectator})
-		eventType = stats.JoinGame
+		log.Println("received unexpected join message:", line)
 	case strings.HasSuffix(line, "has left the game"):
 		// Not posted to discord on Raven's server
-		var name string
-		_, err := fmt.Sscanf(line, "%s has left the game", &name)
-		if err != nil {
-			log.Println("failed to parse game leave:", err)
-			return
-		}
-		// Do not remove from a player list (for now)
-		eventType = stats.LeaveGame
+		log.Println("received unexpected leave message:", line)
 	case strings.Contains(line, "has joined team"):
 		var teamName, name string
 		_, err := fmt.Sscanf(line, "%s has joined team %s", &name, &teamName)
