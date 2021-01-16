@@ -136,6 +136,7 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 			log.Println("err: unknown team:", line)
 		}
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.WinnerAnnounce, Payload: line, Timestamp: t})
+		return true
 	case strings.HasPrefix(line, "Time - "):
 		var hours, minutes int
 		_, err := fmt.Sscanf(line, "Time - %d hours and %d minutes", &hours, &minutes)

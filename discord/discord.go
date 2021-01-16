@@ -47,7 +47,6 @@ func _getCurrentMatch(id string) *stats.Match {
 		return nil
 	}
 	m := currentMatch[id]
-	parser.FixPlayers(m)
 	stats.FillPlayersWithELO(m.Players)
 	stats.FillPlayersWithELO(m.North.Players)
 	stats.FillPlayersWithELO(m.South.Players)
@@ -121,7 +120,6 @@ func processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *sta
 // If skip is set to true, the match isn't put into the database.
 func processMatchEnd(match *stats.Match, t time.Time, skip bool) bool {
 	log.Println("GAME RESTART")
-	parser.FixPlayers(match)
 
 	// Server stops after match restart
 	if match.End.IsZero() || match.End.Before(t) {
@@ -152,7 +150,8 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 
 		// Process map restart
 		if strings.Contains(line, "Map is restarting") || strings.Contains(line, "Server is shutting down") {
-			return processMatchEnd(match, t, skip)
+			// Do not insert a new match, but clear the values of a current one
+			return true
 		}
 
 		// Process bold messages
@@ -174,10 +173,15 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 				parser.ParseMVP(match, line)
 				continue
 			}
+			new_match := false
 			for _, l := range strings.Split(line, "\n") {
 				if parser.ParseLineEmbed(match, l, t) {
-					return processMatchEnd(match, t, skip)
+					// get all the info from the match before submitting it
+					new_match = true
 				}
+			}
+			if new_match {
+				return processMatchEnd(match, t, skip)
 			}
 		}
 	}
