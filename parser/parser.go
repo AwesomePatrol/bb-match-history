@@ -217,9 +217,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 
 		p := findInTeam(match.Players, name)
 		if p == nil {
-			log.Println("player not found")
-			// TODO: add
-			return
+			p = &stats.GamePlayer{Name: name}
 		}
 		processJoin(match, teamName, p)
 		eventType = stats.JoinTeam
@@ -232,6 +230,13 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 			log.Println("failed to parse spectate:", err)
 			return
 		}
+		p := findInTeam(match.Players, name)
+		if p == nil {
+			log.Println("player not found")
+			// TODO: add
+			return
+		}
+		p.Force = stats.Spectator
 		if !removeFromTeam(name, match.South) && !removeFromTeam(name, match.North) {
 			log.Println("player not in team, but spectating:", name, match.North.Players, match.South.Players)
 		}
