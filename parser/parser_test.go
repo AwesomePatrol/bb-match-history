@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseSingleMatch(t *testing.T) {
@@ -12,6 +13,8 @@ func TestParseSingleMatch(t *testing.T) {
 		t.Log(err)
 		t.FailNow()
 	}
+	ParseLineEmbed(match, "North Evo: 60.1%", time.Time{})
+	ParseLineEmbed(match, "North Threat: 2992", time.Time{})
 	t.Log("North")
 	t.Log(match.North)
 	for _, player := range match.North.Players {

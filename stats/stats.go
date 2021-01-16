@@ -53,12 +53,14 @@ type MVPplayer struct {
 
 type Team struct {
 	EmptyModel
-	Players   []*GamePlayer `gorm:"many2many:player_team;"`
-	MVPs      []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
-	AvgELO    float64
-	TotalFeed science.Feed `gorm:"type:integer[]"`
-	IsNorth   bool         `gorm:"type:bool" json:"-"`
-	MatchID   int64        `json:"-"`
+	Players     []*GamePlayer `gorm:"many2many:player_team;"`
+	MVPs        []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
+	AvgELO      float64
+	TotalFeed   science.Feed `gorm:"type:integer[]"`
+	FinalEVO    float32
+	FinalThreat int
+	IsNorth     bool  `gorm:"type:bool" json:"-"`
+	MatchID     int64 `json:"-"`
 }
 
 type EventType int64

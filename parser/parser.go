@@ -149,6 +149,32 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 		}
 		match.Length = time.Hour*time.Duration(hours) + time.Minute*time.Duration(minutes)
 		match.Timeline = append(match.Timeline, &stats.Event{EventType: stats.GameTimeAnnounce, Payload: line, Timestamp: t})
+	case strings.Contains(line, "Evo:"):
+		var teamName string
+		var evo float32
+		_, err := fmt.Sscanf(line, "%s Evo: %f%%", &teamName, &evo)
+		if err != nil {
+			log.Println("failed to parse team's final evo:", err)
+			break
+		}
+		team, _ := getTeam(match, teamName)
+		if team == nil {
+			break
+		}
+		team.FinalEVO = evo
+	case strings.Contains(line, "Threat:"):
+		var teamName string
+		var threat int
+		_, err := fmt.Sscanf(line, "%s Threat: %d", &teamName, &threat)
+		if err != nil {
+			log.Println("failed to parse team's final threat:", err)
+			break
+		}
+		team, _ := getTeam(match, teamName)
+		if team == nil {
+			break
+		}
+		team.FinalThreat = threat
 	}
 	return false
 }
@@ -175,8 +201,12 @@ func findInTeam(players []*stats.GamePlayer, name string) *stats.GamePlayer {
 
 func getTeam(match *stats.Match, name string) (*stats.Team, stats.Force) {
 	switch name {
+	case "North":
+		fallthrough
 	case "north":
 		return match.North, stats.North
+	case "South":
+		fallthrough
 	case "south":
 		return match.South, stats.South
 	}
