@@ -10,7 +10,8 @@ import (
 type Science int64
 
 const (
-	Automation Science = iota
+	Unknown Science = iota
+	Automation
 	Logistic
 	Military
 	Chemical
@@ -26,6 +27,20 @@ func (p *Science) Scan(value interface{}) error {
 
 func (p Science) Value() (string, error) {
 	return fmt.Sprint(p), nil
+}
+
+var name2science = map[string]Science{
+	"automation": Automation,
+	"logistic":   Logistic,
+	"military":   Military,
+	"chemical":   Chemical,
+	"production": Production,
+	"utility":    Utility,
+	"space":      Space,
+}
+
+func NameToScience(name string) Science {
+	return name2science[name]
 }
 
 type Feed []int32

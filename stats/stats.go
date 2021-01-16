@@ -104,6 +104,10 @@ func (p Force) Value() (string, error) {
 	return fmt.Sprint(p), nil
 }
 
+func (p Force) Opposite() Force {
+	return North + (South - p)
+}
+
 type Event struct {
 	EmptyModel
 	Timestamp time.Time

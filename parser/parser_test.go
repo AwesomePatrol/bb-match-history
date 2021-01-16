@@ -13,10 +13,12 @@ func TestParseSingleMatch(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log("North")
+	t.Log(match.North)
 	for _, player := range match.North.Players {
 		t.Log(player)
 	}
 	t.Log("South")
+	t.Log(match.South)
 	for _, player := range match.South.Players {
 		t.Log(player)
 	}

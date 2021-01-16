@@ -99,6 +99,7 @@ Dispaminite: i'll go look
 whiteleaky: kk
 derev0 has joined the game
 whiteleaky: [gps=696,105]
+whiteleaky fed 362 flasks of chemical science to team north biters!
 CooL_bobrui has joined the game
 CooL_bobrui has joined team north!
 IKCharlie has joined the game

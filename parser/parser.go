@@ -10,6 +10,7 @@ import (
 
 	"github.com/awesomepatrol/bb-match-history/stats"
 	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
+	"github.com/awesomepatrol/bb-match-history/stats/const/science"
 )
 
 func NewMatch() (match *stats.Match) {
@@ -258,11 +259,22 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		eventType = stats.JoinTeam
 	case strings.Contains(line, " flasks of "):
 		var teamName, name, scienceName string
-		var amount int
+		var amount int32
 		_, err := fmt.Sscanf(line, "%s fed %d flasks of %s science to team %s biters!", &name, &amount, &scienceName, &teamName)
 		if err != nil {
 			log.Println("failed to parse feeding:", err)
 			return
+		}
+		sc := science.NameToScience(scienceName)
+		if sc == science.Unknown {
+			log.Println("unknown science type")
+			return
+		}
+		switch teamName {
+		case "north":
+			match.South.TotalFeed[int(sc)-1] += amount
+		case "south":
+			match.North.TotalFeed[int(sc)-1] += amount
 		}
 		eventType = stats.Feed
 	default:
