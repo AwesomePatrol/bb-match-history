@@ -89,7 +89,8 @@ func (p EventType) Value() (string, error) {
 type Force int64
 
 const (
-	Spectator Force = iota
+	Unknown Force = iota
+	Spectator
 	North
 	South
 )

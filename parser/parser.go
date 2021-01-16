@@ -171,23 +171,27 @@ func findInTeam(players []*stats.GamePlayer, name string) *stats.GamePlayer {
 	return nil
 }
 
-func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) {
-	var team *stats.Team
-	switch teamName {
+func getTeam(match *stats.Match, name string) (*stats.Team, stats.Force) {
+	switch name {
 	case "north":
-		team = match.North
-		player.Force = stats.North
+		return match.North, stats.North
 	case "south":
-		team = match.South
-		player.Force = stats.South
-	default:
-		log.Println("unknown team name:", teamName)
+		return match.South, stats.South
+	}
+	log.Println("unknown team name:", name)
+	return nil, stats.Unknown
+}
+
+func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) {
+	team, force := getTeam(match, teamName)
+	if team == nil {
 		return
 	}
-	if findInTeam(team.Players, player.Name) != nil {
-		log.Println("player already linked to team:", player.Name)
+	if player.Force == force || findInTeam(team.Players, player.Name) != nil {
+		log.Println("ignoring join, player already linked to team:", player.Name)
 		return
 	}
+	player.Force = force
 	team.Players = append(team.Players, player)
 }
 
@@ -197,6 +201,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 	var eventType stats.EventType
 	switch {
 	case strings.HasSuffix(line, "has joined the game"):
+		// Not posted to discord on Raven's server
 		var name string
 		_, err := fmt.Sscanf(line, "%s has joined the game", &name)
 		if err != nil {
@@ -208,6 +213,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		match.Players = append(match.Players, &stats.GamePlayer{Name: name, Force: stats.Spectator})
 		eventType = stats.JoinGame
 	case strings.HasSuffix(line, "has left the game"):
+		// Not posted to discord on Raven's server
 		var name string
 		_, err := fmt.Sscanf(line, "%s has left the game", &name)
 		if err != nil {
