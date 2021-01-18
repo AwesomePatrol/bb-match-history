@@ -46,9 +46,10 @@ func NameToScience(name string) Science {
 type Feed []int32
 
 func (p *Feed) Scan(value interface{}) error {
-	return pq.Array(p).Scan(value)
+	*p = make([]int32, 7)
+	return (*pq.Int32Array)(p).Scan(value)
 }
 
 func (p Feed) Value() (driver.Value, error) {
-	return pq.Array(p).Value()
+	return (pq.Int32Array)(p).Value()
 }
