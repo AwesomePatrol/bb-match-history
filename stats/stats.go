@@ -18,18 +18,17 @@ type EmptyModel struct {
 
 type Player struct {
 	EmptyModel
-	Name    string `gorm:"unique"`
-	ELO     int
+	Name    string  `gorm:"unique"`
+	ELO     int     `gorm:"-"`
 	History []Match `gorm:"many2many:player_match;" json:"-"`
 }
 
 type GamePlayer struct {
 	EmptyModel
-	PlayerID  uint
+	PlayerID  uint `json:"-"`
 	Player    Player
 	Force     Force
 	MatchID   int64 `json:"-"`
-	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
 	BeforeELO int
 	GainELO   int
 }
