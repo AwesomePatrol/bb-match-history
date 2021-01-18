@@ -40,7 +40,7 @@ function fillShortMatchPlayerNameRow(team, i) {
     if (i >= team.length) {
         return td;
     }
-    let name = team[i].Name;
+    let name = team[i].Player.Name;
     td.append($("<a>")
         .attr("href", "/search/?name=" + encodeURIComponent(name))
         .append(name));
@@ -52,7 +52,7 @@ function fillShortMatchPlayerEloRow(team, i) {
     if (i >= team.length) {
         return td;
     }
-    td.append(team[i].ELO);
+    td.append(team[i].BeforeELO);
     return td;
 }
 
@@ -67,9 +67,9 @@ function fillShortMatchDetailsRows(details) {
             .addClass("table-secondary");
     if (showELO()) {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
-            .append($("<td>").append("ELO"))
+            .append($("<td>").append("ELO [" + details.North.AvgELO + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"))
-            .append($("<td>").append("ELO"));
+            .append($("<td>").append("ELO [" + details.North.AvgELO + "]"));
     } else {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"));

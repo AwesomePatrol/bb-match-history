@@ -18,17 +18,18 @@ type EmptyModel struct {
 
 type Player struct {
 	EmptyModel
-	Name    string  `gorm:"unique"`
-	ELO     int     `gorm:"-"`
-	History []Match `gorm:"many2many:player_match;" json:"-"`
+	Name    string `gorm:"unique"`
+	ELO     int    `gorm:"-"`
+	History []*GamePlayer
 }
 
 type GamePlayer struct {
 	EmptyModel
-	PlayerID  uint `json:"-"`
-	Player    Player
+	PlayerID  uint   `json:"-"`
+	Player    Player `json:",omitempty"`
 	Force     Force
-	MatchID   int64 `json:"-"`
+	MatchID   uint `json:"-"`
+	Match     *Match
 	BeforeELO int
 	GainELO   int
 }
@@ -53,14 +54,14 @@ type MVPplayer struct {
 
 type Team struct {
 	EmptyModel
-	Players     []*GamePlayer `gorm:"many2many:player_team;"`
+	Players     []*GamePlayer `gorm:"foreignkey:MatchID"`
 	MVPs        []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
 	AvgELO      float64
 	TotalFeed   science.Feed `gorm:"type:integer[]"`
 	FinalEVO    float32
 	FinalThreat int
-	IsNorth     bool  `gorm:"type:bool" json:"-"`
-	MatchID     int64 `json:"-"`
+	IsNorth     bool `gorm:"type:bool" json:"-"`
+	MatchID     uint `json:"-"`
 }
 
 type EventType int64
@@ -115,12 +116,12 @@ type Event struct {
 	Timestamp time.Time
 	EventType EventType
 	Payload   string
-	MatchID   int64 `json:"-"`
+	MatchID   uint `json:"-"`
 }
 
 type Match struct {
 	Model
-	Players      []*GamePlayer `gorm:"many2many:player_match;" json:",omitempty"`
+	Players      []*GamePlayer `json:",omitempty"`
 	South, North *Team         `gorm:"foreignkey:MatchID" json:",omitempty"`
 	Start        time.Time     `gorm:"UNIQUE" json:",omitempty"`
 	End          time.Time     `json:",omitempty"`

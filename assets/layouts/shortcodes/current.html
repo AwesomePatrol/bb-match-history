@@ -116,7 +116,7 @@ function fetchCurrent() {
     $.getJSON(endpoint)
         .done(function(data) {
             $("#errorMsg").hide();
-            if (typeof data.Players === 'undefined') {
+            if (data == null || typeof data.Players === 'undefined') {
                 $("#errorMsg")
                     .html("There is no ongoing match to show!")
                     .show();

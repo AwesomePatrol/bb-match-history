@@ -23,6 +23,7 @@ func OpenDB(path string) {
 		panic(fmt.Sprint("failed to connect database:", err))
 	}
 	db.AutoMigrate(&Player{})
+	db.AutoMigrate(&GamePlayer{})
 	db.AutoMigrate(&Event{})
 	db.AutoMigrate(&MVPplayer{})
 	db.AutoMigrate(&Team{})
@@ -75,13 +76,13 @@ func queryMatchShort(id int) (match *Match, err error) {
 	}
 
 	match.North = new(Team)
-	err = db.Preload("Players").Where("is_north = ?", true).Where("match_id = ?", match.ID).First(match.North).Error
+	err = db.Preload("Players").Preload("Players.Player").Where("is_north = ?", true).Where("match_id = ?", match.ID).First(match.North).Error
 	if err != nil {
 		return nil, err
 	}
 
 	match.South = new(Team)
-	err = db.Preload("Players").Where("is_north = ?", false).Where("match_id = ?", match.ID).First(match.South).Error
+	err = db.Preload("Players").Preload("Players.Player").Where("is_north = ?", false).Where("match_id = ?", match.ID).First(match.South).Error
 	if err != nil {
 		return nil, err
 	}
@@ -250,27 +251,12 @@ func (team *Team) IsPlayerInTeam(name string) bool {
 	return false
 }
 
-func QueryPlayerMatches(name string) ([]Match, error) {
-	player := Player{Name: name}
-	err := db.Preload("History.Match").Preload("History", func(db *gorm.DB) *gorm.DB {
-		return db.Order("matches.start DESC")
-	}).First(&player).Error
+func QueryPlayerMatchesShort(name string) (gp []*GamePlayer, err error) {
+	player := new(Player)
+	err = db.Where("name = ?", name).First(player).Error
 	if err != nil {
 		return nil, err
 	}
-
-	for _, match := range player.History {
-		var teamW Team
-		err = db.Preload("Players").Where("is_north = ?", match.Winner == North).Where("match_id = ?", match.ID).First(&teamW).Error
-		if err != nil {
-			return nil, err
-		}
-		var teamL Team
-		err = db.Preload("Players").Where("is_north = ?", match.Winner == South).Where("match_id = ?", match.ID).First(&teamL).Error
-		if err != nil {
-			return nil, err
-		}
-		// TODO: convert to PlayerMatch
-	}
-	return player.History, nil
+	err = db.Preload("Match").Where("player_id = ?", player.ID).Find(&gp).Error
+	return
 }

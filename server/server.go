@@ -29,7 +29,7 @@ func OpenHTTP(addr string) {
 	router.Use(static.Serve("/", static.LocalFile("assets/public", false)))
 	router.GET("/api/player/:name/history", func(c *gin.Context) {
 		name := c.Param("name")
-		matches, err := stats.QueryPlayerMatches(name)
+		matches, err := stats.QueryPlayerMatchesShort(name)
 		if err != nil {
 			// FIXME
 			c.String(http.StatusNotFound, err.Error())
@@ -106,6 +106,10 @@ func OpenHTTP(addr string) {
 		builders, err := stats.QueryGlobalMVP("Builder")
 		if err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
+		}
+		if len(defenders) == 0 || len(deaths) == 0 || len(builders) == 0 {
+			c.Status(http.StatusNotFound)
+			return
 		}
 		c.JSON(http.StatusOK, struct {
 			Defenders []stats.MVPquery
