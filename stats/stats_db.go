@@ -59,13 +59,7 @@ func InsertMatch(match *Match) error {
 	updateTeamELO(match.North)
 	updateTeamELO(match.South)
 
-	db.Create(match)
-
-	if db.Error != nil {
-		return db.Error
-	}
-
-	return nil
+	return db.Create(match).Error
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
@@ -75,9 +69,9 @@ func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
 
 func queryMatchShort(id int) (match *Match, err error) {
 	match = new(Match)
-	db.Preload("Players").First(match, id)
-	if db.Error != nil {
-		return nil, db.Error
+	err = db.Preload("Players").First(match, id).Error
+	if err != nil {
+		return
 	}
 
 	match.North = new(Team)
@@ -202,10 +196,10 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 
 func updateTeamELO(t *Team) (err error) {
 	for _, p := range t.Players {
-		db.Model(&Player{}).Where("name = ?", p.Name).Update("ELO", p.BeforeELO+p.GainELO)
-		if db.Error != nil {
-			log.Println("failed to update ELO for", p.Name, ":", err)
-			return
+		err = db.Model(&Player{}).Where("name = ?", p.Player.Name).Update("ELO", p.BeforeELO+p.GainELO).Error
+		if err != nil {
+			log.Println("failed to update ELO for", p.Player.Name, ":", err)
+			return nil // Ignore error
 		}
 	}
 	return nil
@@ -249,7 +243,7 @@ func UpdateELO() (err error) {
 
 func (team *Team) IsPlayerInTeam(name string) bool {
 	for _, p := range team.Players {
-		if p.Name == name {
+		if p.Player.Name == name {
 			return true
 		}
 	}

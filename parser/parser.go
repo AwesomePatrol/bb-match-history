@@ -181,7 +181,7 @@ func ParseLineEmbed(match *stats.Match, line string, t time.Time) bool {
 
 func removeFromTeam(name string, team *stats.Team) bool {
 	for i, p := range team.Players {
-		if p.Name == name {
+		if p.Player.Name == name {
 			team.Players[i] = team.Players[len(team.Players)-1]
 			team.Players = team.Players[:len(team.Players)-1]
 			return true
@@ -192,7 +192,7 @@ func removeFromTeam(name string, team *stats.Team) bool {
 
 func findInTeam(players []*stats.GamePlayer, name string) *stats.GamePlayer {
 	for _, p := range players {
-		if p.Name == name {
+		if p.Player.Name == name {
 			return p
 		}
 	}
@@ -219,8 +219,8 @@ func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) 
 	if team == nil {
 		return
 	}
-	if player.Force == force || findInTeam(team.Players, player.Name) != nil {
-		log.Println("ignoring join, player already linked to team:", player.Name)
+	if player.Force == force || findInTeam(team.Players, player.Player.Name) != nil {
+		log.Println("ignoring join, player already linked to team:", player.Player.Name)
 		return
 	}
 	player.Force = force

@@ -35,7 +35,7 @@ func calcChangeELO(playerELO, avgOpponentELO float64, won bool) int {
 func (t *Team) updateTeamELO(avgOpponentELO float64, won bool) {
 	for _, p := range t.Players {
 		d := calcChangeELO(float64(p.BeforeELO), avgOpponentELO, won)
-		log.Printf("elo update: %20s %4d [%+2d]\n", p.Name, p.BeforeELO, d)
+		log.Printf("elo update: %20s %4d [%+2d]\n", p.Player.Name, p.BeforeELO, d)
 		p.GainELO = d
 	}
 }
@@ -62,7 +62,7 @@ func (m *Match) UpdateMatchELO() {
 func FillPlayersWithELO(players []*GamePlayer) {
 	for _, p := range players {
 		if p.BeforeELO == 0 {
-			qp, err := QueryPlayerByName(p.Name)
+			qp, err := QueryPlayerByName(p.Player.Name)
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
 					continue

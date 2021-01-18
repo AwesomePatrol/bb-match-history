@@ -25,7 +25,8 @@ type Player struct {
 
 type GamePlayer struct {
 	EmptyModel
-	Player
+	PlayerID  uint
+	Player    Player
 	Force     Force
 	MatchID   int64 `json:"-"`
 	IsWinner  *bool // IsWinner is a pointer to indicate situtation when player is just a spectator.
