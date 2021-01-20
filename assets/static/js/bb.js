@@ -35,6 +35,18 @@ function showDifficultyBreakdown() {
     df.show();
 }
 
+function fillShortMatchPlayerNameRowDirect(team, i) {
+    let td = $("<td>");
+    if (i >= team.length) {
+        return td;
+    }
+    let name = team[i].Name;
+    td.append($("<a>")
+        .attr("href", "/search/?name=" + encodeURIComponent(name))
+        .append(name));
+    return td;
+}
+
 function fillShortMatchPlayerNameRow(team, i) {
     let td = $("<td>");
     if (i >= team.length) {
@@ -44,6 +56,15 @@ function fillShortMatchPlayerNameRow(team, i) {
     td.append($("<a>")
         .attr("href", "/search/?name=" + encodeURIComponent(name))
         .append(name));
+    return td;
+}
+
+function fillShortMatchPlayerEloRowDirect(team, i) {
+    let td = $("<td>");
+    if (i >= team.length) {
+        return td;
+    }
+    td.append(team[i].ELO);
     return td;
 }
 

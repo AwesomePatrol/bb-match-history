@@ -40,8 +40,8 @@ $('#ELO').ready(function() {
             for (let i=0; i<data.length; i++) {
                 let tr = $("<tr>");
                 tr.append($("<td>").append(i+1));
-                tr.append(fillShortMatchPlayerNameRow(data, i));
-                tr.append(fillShortMatchPlayerEloRow(data, i));
+                tr.append(fillShortMatchPlayerNameRowDirect(data, i));
+                tr.append(fillShortMatchPlayerEloRowDirect(data, i));
                 body.append(tr);
             }
             tbl.append(body);
