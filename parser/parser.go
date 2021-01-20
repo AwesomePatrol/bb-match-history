@@ -250,6 +250,7 @@ func ParseLine(match *stats.Match, line string, t time.Time) {
 		p := findInTeam(match.Players, name)
 		if p == nil {
 			p = &stats.GamePlayer{Player: stats.Player{Name: name}}
+			match.Players = append(match.Players, p)
 		}
 		processJoin(match, teamName, p)
 		eventType = stats.JoinTeam
