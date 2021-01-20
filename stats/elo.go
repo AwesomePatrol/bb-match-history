@@ -55,6 +55,8 @@ func (m *Match) UpdateMatchELO() {
 	if len(m.South.Players) == 0 || len(m.North.Players) == 0 { // Don't update 1 v nothing
 		return
 	}
+	m.North.setAvgELO()
+	m.South.setAvgELO()
 	m.North.updateTeamELO(m.South.AvgELO, m.Winner == North)
 	m.South.updateTeamELO(m.North.AvgELO, m.Winner == South)
 }

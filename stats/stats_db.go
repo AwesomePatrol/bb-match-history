@@ -57,8 +57,6 @@ func InsertMatch(match *Match) error {
 	FillPlayersWithELO(match.North.Players)
 	FillPlayersWithELO(match.South.Players)
 	match.UpdateMatchELO()
-	updateTeamELO(match.North)
-	updateTeamELO(match.South)
 
 	return db.Create(match).Error
 }

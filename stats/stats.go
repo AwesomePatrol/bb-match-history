@@ -19,7 +19,7 @@ type EmptyModel struct {
 type Player struct {
 	EmptyModel
 	Name    string `gorm:"unique"`
-	ELO     int    `gorm:"-"`
+	ELO     int
 	History []*GamePlayer
 }
 
