@@ -288,7 +288,7 @@ function addRecentMatchesEntry(tbl, match) {
 function showELO() {
     let elo = urlParams.get("elo");
     if (elo == null) {
-        return false;
+        return true;
     }
-    return elo == "1";
+    return elo != "0";
 }
