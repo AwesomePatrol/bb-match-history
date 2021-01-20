@@ -74,13 +74,21 @@ func queryMatchShort(id int) (match *Match, err error) {
 	}
 
 	match.North = new(Team)
-	err = db.Preload("Players").Preload("Players.Player").Where("is_north = ?", true).Where("match_id = ?", match.ID).First(match.North).Error
+	err = db.Where("is_north = ?", true).Where("match_id = ?", match.ID).First(match.North).Error
+	if err != nil {
+		return nil, err
+	}
+	err = db.Preload("Player").Where("match_id = ?", match.ID).Where("force = ?", North).Find(&match.North.Players).Error
 	if err != nil {
 		return nil, err
 	}
 
 	match.South = new(Team)
-	err = db.Preload("Players").Preload("Players.Player").Where("is_north = ?", false).Where("match_id = ?", match.ID).First(match.South).Error
+	err = db.Where("is_north = ?", false).Where("match_id = ?", match.ID).First(match.South).Error
+	if err != nil {
+		return nil, err
+	}
+	err = db.Preload("Player").Where("match_id = ?", match.ID).Where("force = ?", South).Find(&match.South.Players).Error
 	if err != nil {
 		return nil, err
 	}
@@ -255,6 +263,6 @@ func QueryPlayerMatchesShort(name string) (gp []*GamePlayer, err error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.Preload("Match").Where("player_id = ?", player.ID).Find(&gp).Error
+	err = db.Preload("Match").Omit("Player").Where("player_id = ?", player.ID).Find(&gp).Error
 	return
 }

@@ -20,16 +20,16 @@ type Player struct {
 	EmptyModel
 	Name    string `gorm:"unique"`
 	ELO     int
-	History []*GamePlayer
+	History []*GamePlayer `gorm:"foreignkey:PlayerID" json:",omitempty"`
 }
 
 type GamePlayer struct {
 	EmptyModel
-	PlayerID  uint   `json:"-"`
-	Player    Player `json:",omitempty"`
+	PlayerID  uint    `json:"-"`
+	Player    *Player `json:",omitempty"`
 	Force     Force
-	MatchID   uint `json:"-"`
-	Match     *Match
+	MatchID   uint   `json:"-"`
+	Match     *Match `json:",omitempty"`
 	BeforeELO int
 	GainELO   int
 }

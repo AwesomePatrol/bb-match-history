@@ -40,7 +40,7 @@ func (t *Team) updateTeamELO(avgOpponentELO float64, won bool) {
 	}
 }
 
-func (t *Team) setAvgELO() float64 {
+func (t *Team) setAvgELO() {
 	sum := 0
 	for _, p := range t.Players {
 		if p.BeforeELO == 0 {
@@ -48,7 +48,7 @@ func (t *Team) setAvgELO() float64 {
 		}
 		sum += p.BeforeELO
 	}
-	return float64(sum) / float64(len(t.Players)) // smaller error
+	t.AvgELO = float64(sum) / float64(len(t.Players)) // smaller error
 }
 
 func (m *Match) UpdateMatchELO() {

@@ -50,7 +50,7 @@ function getPlayerMatchHistory() {
     $.getJSON( "/api/player/"+encodeURIComponent(name)+"/history")
         .done(function(data) {
             $.each(data, function(index, match) {
-                addRecentMatchesEntry(tbl, match);
+                addRecentMatchesEntry(tbl, match.Match);
             });
 
             showStats();
