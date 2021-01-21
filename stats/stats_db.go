@@ -53,12 +53,22 @@ func InsertMatch(match *Match) error {
 	}
 
 	// Calculate ELO and update player's ELO values in db.
-	FillPlayersWithELO(match.Players)
-	FillPlayersWithELO(match.North.Players)
-	FillPlayersWithELO(match.South.Players)
+	FillPlayersWithELO(match.Players) // Assume all players are present in this slice.
 	match.UpdateMatchELO()
 
-	return db.Create(match).Error
+	err := db.Create(match).Error
+	for _, p := range match.Players {
+		log.Println(p, *p.Player)
+	}
+	log.Println("north")
+	for _, p := range match.North.Players {
+		log.Println(p, *p.Player)
+	}
+	log.Println("south")
+	for _, p := range match.South.Players {
+		log.Println(p, *p.Player)
+	}
+	return err
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
@@ -263,6 +273,6 @@ func QueryPlayerMatchesShort(name string) (gp []*GamePlayer, err error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.Preload("Match").Omit("Player").Where("player_id = ?", player.ID).Find(&gp).Error
+	err = db.Preload("Match").Omit("Player").Order("id desc").Where("player_id = ?", player.ID).Find(&gp).Error
 	return
 }

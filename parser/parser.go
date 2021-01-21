@@ -223,6 +223,20 @@ func processJoin(match *stats.Match, teamName string, player *stats.GamePlayer) 
 		log.Println("ignoring join, player already linked to team:", player.Player.Name)
 		return
 	}
+
+	// Make sure that player isn't on the opposite side already.
+	switch force {
+	case stats.North:
+		if removeFromTeam(player.Player.Name, match.South) {
+			log.Println("north player was on south", player)
+		}
+	case stats.South:
+		if removeFromTeam(player.Player.Name, match.North) {
+			log.Println("south player was on north", player)
+		}
+	}
+
+	// Update force and add to the list
 	player.Force = force
 	team.Players = append(team.Players, player)
 }

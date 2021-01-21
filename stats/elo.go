@@ -37,6 +37,8 @@ func (t *Team) updateTeamELO(avgOpponentELO float64, won bool) {
 		d := calcChangeELO(float64(p.BeforeELO), avgOpponentELO, won)
 		log.Printf("elo update: %20s %4d [%+2d]\n", p.Player.Name, p.BeforeELO, d)
 		p.GainELO = d
+		// Update player's ELO
+		p.Player.ELO = p.BeforeELO + p.GainELO
 	}
 }
 

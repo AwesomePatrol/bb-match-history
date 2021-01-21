@@ -6,4 +6,6 @@ draft: false
 
 Note: Only the last 128 matches are shown.
 
+Note: Click on match to get a short summary. Click on match ID to get more details.
+
 {{< recent >}}

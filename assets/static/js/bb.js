@@ -88,9 +88,9 @@ function fillShortMatchDetailsRows(details) {
             .addClass("table-secondary");
     if (showELO()) {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
-            .append($("<td>").append("ELO [" + details.North.AvgELO + "]"))
+            .append($("<td>").append("ELO [" + Math.round(details.North.AvgELO) + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"))
-            .append($("<td>").append("ELO [" + details.North.AvgELO + "]"));
+            .append($("<td>").append("ELO [" + Math.round(details.North.AvgELO) + "]"));
     } else {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"));
