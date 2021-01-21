@@ -10,6 +10,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var db *gorm.DB
@@ -56,7 +57,9 @@ func InsertMatch(match *Match) error {
 	FillPlayersWithELO(match.Players) // Assume all players are present in this slice.
 	match.UpdateMatchELO()
 
-	err := db.Create(match).Error
+	err := db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(match).Error
 	for _, p := range match.Players {
 		log.Println(p, *p.Player)
 	}
