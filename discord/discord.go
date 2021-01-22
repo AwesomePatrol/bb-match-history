@@ -166,6 +166,10 @@ func _processMatchMessages(s *discordgo.Session, m *discordgo.Message, match *st
 		for _, f := range e.Fields {
 			line := f.Value
 			line = strings.ReplaceAll(line, "\\", "")
+			if strings.Contains(line, "Poll") {
+				log.Println("skipping poll")
+				return false
+			}
 			log.Println("parsing embed:", line)
 			if strings.Contains(line, "MVP") {
 				parser.ParseMVP(match, line)
