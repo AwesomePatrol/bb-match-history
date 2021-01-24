@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -174,6 +175,35 @@ func OpenHTTP(addr string) {
 		err = graph.RenderDifficultyBreakdown(c.Writer, time.Now().AddDate(0, 0, -n))
 		if err != nil {
 			// FIXME
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.Status(http.StatusOK)
+	})
+	router.GET("/api/stats/ups/avg/:n", func(c *gin.Context) {
+		n, err := strconv.Atoi(c.Param("n"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		ups, err := stats.GetMatchesAverageUPS(time.Now().AddDate(0, 0, -n))
+		if err != nil {
+			// FIXME
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.String(http.StatusOK, fmt.Sprintf("%.2f", ups))
+	})
+	router.GET("/api/graph/ups/:n", func(c *gin.Context) {
+		n, err := strconv.Atoi(c.Param("n"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		err = graph.RenderHistogramUPS(c.Writer, time.Now().AddDate(0, 0, -n))
+		if err != nil {
+			// FIXME
+			log.Println(err)
 			c.String(http.StatusInternalServerError, err.Error())
 			return
 		}

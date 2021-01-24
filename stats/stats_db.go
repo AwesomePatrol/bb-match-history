@@ -81,6 +81,16 @@ func CountMatchesByDifficulty(diff difficulty.Difficulty, after time.Time) (n in
 	return
 }
 
+func GetMatchesAverageUPS(after time.Time) (n float64, err error) {
+	err = db.Model(new(Match)).Where("start > ?", after).Select("avg(length/(strftime('%s',end)-strftime('%s',start)))/1000000000*60 as res").First(&n).Error
+	return
+}
+
+func GetMatchesAverageUPSAll(after time.Time) (n []float64, err error) {
+	err = db.Model(new(Match)).Where("start > ?", after).Select("60*length/(strftime('%s',end)-strftime('%s',start))/1000000000 as res").Find(&n).Error
+	return
+}
+
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
 	err = db.Table("mv_pplayers").Where("title = ?", title).Select("name, count(name) as stat, sum(stat) as total").Group("name").Order("stat desc").Limit(10).Scan(&mvp).Error
 	return
