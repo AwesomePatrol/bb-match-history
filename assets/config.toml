@@ -34,9 +34,13 @@ theme = "minimal-bootstrap-hugo-theme"
   url = "/search/"
   weight = 4
   [[menu.nav]]
+  name = "Stats"
+  url = "/stats/"
+  weight = 5
+  [[menu.nav]]
   name = "About"
   url = "/about/"
-  weight = 5
+  weight = 6
 
 [markup]
   defaultMarkdownHandler = "goldmark"

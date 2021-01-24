@@ -20,13 +20,8 @@ func RenderDifficultyBreakdown(w io.Writer, after time.Time) error {
 		c[i] = v
 	}
 	pie := chart.PieChart{
-		Background: chart.Style{
-			Padding: chart.Box{
-				Left: 80,
-			},
-		},
-		Width:  512,
-		Height: 512,
+		Width:  360,
+		Height: 360,
 		Values: []chart.Value{
 			{Value: float64(c[0] + c[1] + c[2]), Label: "Below Normal"},
 			{Value: float64(c[3]), Label: "Normal"},
