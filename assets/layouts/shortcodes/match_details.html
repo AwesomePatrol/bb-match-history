@@ -5,6 +5,7 @@
 <div id="difficulty"></div>
 </br>
 <div style="width: 49%; float:left;" id="playerList"></div>
+<div style="width: 49%; float:right;" id="statList"></div>
 <div style="width: 49%; float:right;" id="eventList"></div>
 </br>
 </div>
@@ -15,6 +16,7 @@ function fetchByID(id) {
         .done(function(data) {
             $("#errorMsg").hide();
             $("#playerList").html(fillShortMatchDetailsRows(data));
+            $("#statList").html(fillDetails(data, false));
             // Reverse event list order (newest on top)
             data.Timeline.reverse();
             $("#eventList").html(fillLongMatchDetailsRows(data));
