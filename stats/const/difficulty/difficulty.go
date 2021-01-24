@@ -49,3 +49,18 @@ func StringToDifficulty(s string) (d Difficulty, err error) {
 	}
 	return d, nil
 }
+
+var diff2str = map[Difficulty]string{
+	Peaceful:      "I'm Too Young to Die",
+	PieceOfCake:   "Piece of Cake",
+	Easy:          "Easy",
+	Normal:        "Normal",
+	Hard:          "Hard",
+	Nightmare:     "Nightmare",
+	UltraViolence: "Ultra-Violence",
+	FunAndFast:    "Fun and Fast",
+}
+
+func DifficultyToString(d Difficulty) string {
+	return diff2str[d]
+}

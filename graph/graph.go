@@ -5,8 +5,36 @@ import (
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/stats"
+	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
 	chart "github.com/wcharczuk/go-chart/v2"
 )
+
+func RenderDifficultyBreakdown(w io.Writer, after time.Time) error {
+	c := make([]int64, 8)
+	for i := 0; i < 8; i++ {
+		d := difficulty.Difficulty(i)
+		v, err := stats.CountMatchesByDifficulty(d, after)
+		if err != nil {
+			return err
+		}
+		c[i] = v
+	}
+	pie := chart.PieChart{
+		Background: chart.Style{
+			Padding: chart.Box{
+				Left: 80,
+			},
+		},
+		Width:  512,
+		Height: 512,
+		Values: []chart.Value{
+			{Value: float64(c[0] + c[1] + c[2]), Label: "Below Normal"},
+			{Value: float64(c[3]), Label: "Normal"},
+			{Value: float64(c[4] + c[5] + c[6] + c[7]), Label: "Above Normal"},
+		},
+	}
+	return pie.Render(chart.PNG, w)
+}
 
 func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 	x := make([]time.Time, len(matches))

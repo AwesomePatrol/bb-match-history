@@ -6,7 +6,9 @@ import (
 	"io"
 	"log"
 	"strconv"
+	"time"
 
+	"github.com/awesomepatrol/bb-match-history/stats/const/difficulty"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -72,6 +74,11 @@ func InsertMatch(match *Match) error {
 		}
 	}
 	return nil
+}
+
+func CountMatchesByDifficulty(diff difficulty.Difficulty, after time.Time) (n int64, err error) {
+	err = db.Model(new(Match)).Where("difficulty = ?", diff).Where("start > ?", after).Count(&n).Error
+	return
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
