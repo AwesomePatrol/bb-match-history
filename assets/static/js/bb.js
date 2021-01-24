@@ -94,7 +94,7 @@ function fillShortMatchPlayerEloRow(team, i) {
     return td;
 }
 
-function fillDetails(details) {
+function fillDetails(details, short_ver) {
     let tbl_thead = $("<tr>")
         .addClass("table-secondary")
         .append($("<td>").append("Stat"))
@@ -114,6 +114,11 @@ function fillDetails(details) {
         tr.append($("<td>").append(details.North.TotalFeed[i]));
         tr.append($("<td>").append(details.South.TotalFeed[i]));
         body.append(tr);
+    }
+    if (short_ver) {
+        tbl.append(body);
+
+        return tbl;
     }
     body.append($("<tr>").append("<td colSpan=\"3\">"));
     {
@@ -300,7 +305,7 @@ function getMatchDetails(event) {
             } else {
                 td.append($("<small>").append(fillShortMatchDetailsRows(data)))
                 td.append($("<br>"))
-                    .append($("<small>").append(fillDetails(data)));
+                    .append($("<small>").append(fillDetails(data, false)));
             }
             tr.append(td);
         })
