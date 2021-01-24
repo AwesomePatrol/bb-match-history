@@ -259,11 +259,14 @@ function getMatchDetails(event) {
     });
 }
 
-function addRecentMatchesEntry(tbl, match) {
+function addRecentMatchesEntry(tbl, match, force) {
     let ago = moment(match.Start);
-    let winner = "South";
-    if (match.NorthWon) {
+    let winner = "Unknown";
+    if (match.Winner == 2) {
       winner = "North";
+    }
+    if (match.Winner == 3) {
+      winner = "South";
     }
     let diffStr = diff2str[match.Difficulty];
     let row = $("<tr>")
@@ -275,8 +278,8 @@ function addRecentMatchesEntry(tbl, match) {
       .append($("<td>").append(winner))
       .append($("<td>").append(diffStr))
       .one("click", {ID: match.ID}, getMatchDetails);
-    if (!(typeof match.IsWinner === 'undefined')) {
-        if (match.IsWinner) {
+    if (force > 1) {
+        if (force == match.Winner) {
             row.addClass("table-success")
         } else {
             row.addClass("table-danger")
