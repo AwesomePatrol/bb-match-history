@@ -18,8 +18,8 @@ type EmptyModel struct {
 
 type Player struct {
 	EmptyModel
-	Name    string `gorm:"unique"`
-	ELO     int
+	Name    string        `gorm:"unique"`
+	ELO     int           `gorm:"default:800"`
 	History []*GamePlayer `gorm:"foreignkey:PlayerID" json:",omitempty"`
 }
 
