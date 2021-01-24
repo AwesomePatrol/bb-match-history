@@ -16,12 +16,14 @@ var (
 	token string
 	DB    string
 	addr  string
+	debug bool
 )
 
 func init() {
 	flag.StringVar(&token, "t", "", "Bot Token")
 	flag.StringVar(&DB, "db", "", "Path to DB")
 	flag.StringVar(&addr, "addr", ":8080", "Address of HTTP server")
+	flag.BoolVar(&debug, "debug", false, "Enable debugging options")
 	flag.Parse()
 }
 
@@ -29,20 +31,23 @@ func main() {
 	stats.OpenDB(DB)
 	defer stats.CloseDB()
 
+	if !debug {
+		update, err := stats.ShouldUpdateELO()
+		if err != nil {
+			log.Println("failed to check if ELO was updated:", err)
+		} else if update {
+			err := stats.UpdateELO()
+			if err != nil {
+				log.Println("elo update failed:", err)
+			}
+		}
+	}
+
 	if token == "" {
 		log.Println("run without discord bot")
 	} else {
-		discord.OpenBot(token)
+		discord.OpenBot(token, debug)
 		defer discord.CloseBot()
-	}
-	update, err := stats.ShouldUpdateELO()
-	if err != nil {
-		log.Println("failed to check if ELO was updated:", err)
-	} else if update {
-		err := stats.UpdateELO()
-		if err != nil {
-			log.Println("elo update failed:", err)
-		}
 	}
 
 	server.OpenHTTP(addr)

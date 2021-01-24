@@ -32,6 +32,7 @@ type GamePlayer struct {
 	Match     *Match `json:",omitempty"`
 	BeforeELO int
 	GainELO   int
+	TeamID    uint `json:"-"`
 }
 
 type Channel struct {
@@ -54,7 +55,7 @@ type MVPplayer struct {
 
 type Team struct {
 	EmptyModel
-	Players     []*GamePlayer `gorm:"foreignkey:MatchID"`
+	Players     []*GamePlayer `gorm:"foreignkey:TeamID" json:",omitempty"`
 	MVPs        []*MVPplayer  `gorm:"many2many:mvp_team;" json:",omitempty"`
 	AvgELO      float64
 	TotalFeed   science.Feed `gorm:"type:integer[]"`
@@ -121,7 +122,7 @@ type Event struct {
 
 type Match struct {
 	Model
-	Players      []*GamePlayer `json:",omitempty"`
+	Players      []*GamePlayer `gorm:"foreignkey:MatchID" json:",omitempty"`
 	South, North *Team         `gorm:"foreignkey:MatchID" json:",omitempty"`
 	Start        time.Time     `gorm:"UNIQUE" json:",omitempty"`
 	End          time.Time     `json:",omitempty"`
@@ -133,5 +134,5 @@ type Match struct {
 }
 
 func (m *Match) String() string {
-	return fmt.Sprintf("start: %v end: %v difficulty: %d players: %d", m.Start, m.End, m.Difficulty, len(m.Players))
+	return fmt.Sprintf("id: %d start: %v end: %v difficulty: %d players: %d", m.ID, m.Start, m.End, m.Difficulty, len(m.Players))
 }

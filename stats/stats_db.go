@@ -57,21 +57,9 @@ func InsertMatch(match *Match) error {
 	FillPlayersWithELO(match.Players) // Assume all players are present in this slice.
 	match.UpdateMatchELO()
 
-	err := db.Clauses(clause.OnConflict{
+	return db.Clauses(clause.OnConflict{
 		UpdateAll: true,
 	}).Create(match).Error
-	for _, p := range match.Players {
-		log.Println(p, *p.Player)
-	}
-	log.Println("north")
-	for _, p := range match.North.Players {
-		log.Println(p, *p.Player)
-	}
-	log.Println("south")
-	for _, p := range match.South.Players {
-		log.Println(p, *p.Player)
-	}
-	return err
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
@@ -278,4 +266,21 @@ func QueryPlayerMatchesShort(name string) (gp []*GamePlayer, err error) {
 	}
 	err = db.Preload("Match").Omit("Player").Order("id desc").Where("player_id = ?", player.ID).Find(&gp).Error
 	return
+}
+
+func FillPlayersWithELO(players []*GamePlayer) {
+	for _, p := range players {
+		if p.PlayerID != 0 { // Skip already associated GamePlayers.
+			continue
+		}
+		if p.BeforeELO == 0 {
+			err := db.Where("name", p.Player.Name).Attrs("elo", startELO).FirstOrInit(&p.Player).Error
+			if err != nil {
+				log.Println("failed to query/create player in db:", err)
+				continue
+			}
+			p.BeforeELO = p.Player.ELO
+			p.PlayerID = p.Player.ID
+		}
+	}
 }

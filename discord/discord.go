@@ -69,20 +69,26 @@ func NewMatch(chanID string) (m *stats.Match) {
 
 // OpenBot connects to discord with given token.
 // It will panic if any error occurs.
-func OpenBot(token string) {
+func OpenBot(token string, debug bool) {
 	var err error
 	bot, err = discordgo.New("Bot " + token)
 	if err != nil {
 		panic(fmt.Errorf("error creating Discord session: %s", err))
 	}
 
-	bot.AddHandler(messageCreate)
+	if !debug {
+		bot.AddHandler(messageCreate)
+	}
 
 	err = bot.Open()
 	if err != nil {
 		panic(fmt.Errorf("error opening connection: %s", err))
 	}
 
+	if debug {
+		go parseHistory(bot, casualServer, time.Now().AddDate(0, 0, -1))
+		return
+	}
 	go parseCurrent(bot, casualServer, time.Now().AddDate(0, 0, -1))
 }
 

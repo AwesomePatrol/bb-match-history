@@ -3,8 +3,6 @@ package stats
 import (
 	"log"
 	"math"
-
-	"gorm.io/gorm"
 )
 
 const (
@@ -61,20 +59,4 @@ func (m *Match) UpdateMatchELO() {
 	m.South.setAvgELO()
 	m.North.updateTeamELO(m.South.AvgELO, m.Winner == North)
 	m.South.updateTeamELO(m.North.AvgELO, m.Winner == South)
-}
-
-func FillPlayersWithELO(players []*GamePlayer) {
-	for _, p := range players {
-		if p.BeforeELO == 0 {
-			qp, err := QueryPlayerByName(p.Player.Name)
-			if err != nil {
-				if err == gorm.ErrRecordNotFound {
-					continue
-				}
-				log.Println("failed to get player's elo:", err)
-				continue
-			}
-			p.BeforeELO = qp.ELO
-		}
-	}
 }
