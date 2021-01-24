@@ -35,24 +35,17 @@ func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 		InnerSeries: mainSeries,
 	}
 	graph := chart.Chart{
+		Height: 120,
+		Width:  480,
 		XAxis: chart.XAxis{
 			TickPosition: chart.TickPositionBetweenTicks,
-		},
-		YAxis: chart.YAxis{
-			GridMajorStyle: chart.Style{
-				StrokeColor: chart.ColorAlternateGray,
-				StrokeWidth: 1.0,
-			},
-			GridLines: []chart.GridLine{
-				{Value: 800},
-			},
 		},
 		Series: []chart.Series{
 			mainSeries,
 			minSeries,
 			maxSeries,
-			chart.LastValueAnnotationSeries(minSeries),
-			chart.LastValueAnnotationSeries(maxSeries),
+			//chart.LastValueAnnotationSeries(minSeries),
+			//chart.LastValueAnnotationSeries(maxSeries),
 		},
 	}
 	return graph.Render(chart.PNG, w)
