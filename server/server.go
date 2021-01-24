@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/awesomepatrol/bb-match-history/discord"
+	"github.com/awesomepatrol/bb-match-history/graph"
 	"github.com/awesomepatrol/bb-match-history/stats"
 
 	"github.com/gin-contrib/static"
@@ -142,6 +143,26 @@ func OpenHTTP(addr string) {
 		if err != nil {
 			log.Println("csv dump failed:", err)
 		}
+	})
+	router.GET("/api/graph/player/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		if name == "" {
+			c.String(http.StatusBadRequest, "Missing name parameter")
+			return
+		}
+		matches, err := stats.QueryPlayerMatchesShort(name)
+		if err != nil {
+			// FIXME
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+		err = graph.RenderPlayerELO(matches, c.Writer)
+		if err != nil {
+			// FIXME
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.Status(http.StatusOK)
 	})
 	router.Run(addr)
 }
