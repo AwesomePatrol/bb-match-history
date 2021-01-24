@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"strconv"
-	"strings"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -133,28 +132,10 @@ func QueryTopPlayersByELO(limit int) (p []*Player, err error) {
 	return
 }
 
-func countScienceInEvents(timeline []*Event, name string) (cnt int) {
-	// FIXME extremely inefficient, but should be rarely used
-	for _, e := range timeline {
-		if e.EventType == Feed && strings.Contains(e.Payload, name) {
-			s := strings.Split(e.Payload, " ")
-			if len(s) == 11 {
-				i, err := strconv.Atoi(s[2])
-				if err != nil {
-					log.Println("failed to parse falsk count:", e.Payload)
-					continue
-				}
-				cnt += i
-			}
-		}
-	}
-	return
-}
-
-func intSliceToStringSlice(a []int) (b []string) {
+func intSliceToStringSlice(a []int32) (b []string) {
 	b = make([]string, len(a))
 	for i := range a {
-		b[i] = strconv.Itoa(a[i])
+		b[i] = strconv.Itoa(int(a[i]))
 	}
 	return
 }
@@ -168,31 +149,30 @@ func GetMatchWithFeedsAsCSV(writer io.Writer) (err error) {
 	}
 
 	// header
-	record := make([]string, 12)
-	record = []string{"id", "len", "diff", "player_cnt", "north_won",
-		"feed_red", "feed_green", "feed_grey", "feed_blue", "feed_yellow", "feed_purple", "feed_white"}
+	record := []string{"id", "len", "diff", "player_cnt", "north_won",
+		"north_feed_red", "north_feed_green", "north_feed_grey", "north_feed_blue", "north_feed_yellow", "north_feed_purple", "north_feed_white",
+		"south_feed_red", "south_feed_green", "south_feed_grey", "south_feed_blue", "south_feed_yellow", "south_feed_purple", "south_feed_white",
+	}
 	err = w.Write(record)
 	if err != nil {
 		return
 	}
 
 	for _, m := range matches {
-		timeline := make([]*Event, 0, 128)
-		err = db.Where("match_id = ?", m.ID).Find(&timeline).Error
+		m.North, m.South = new(Team), new(Team)
+		err = db.Where("is_north = ?", true).Where("match_id = ?", m.ID).First(m.North).Error
 		if err != nil {
-			return
+			return err
+		}
+		err = db.Where("is_north = ?", false).Where("match_id = ?", m.ID).First(m.South).Error
+		if err != nil {
+			return err
 		}
 
-		record = intSliceToStringSlice([]int{
-			int(m.ID), int(m.Length), int(m.Difficulty), len(m.Players), int(m.Winner),
-			countScienceInEvents(timeline, "automation"),
-			countScienceInEvents(timeline, "logistic"),
-			countScienceInEvents(timeline, "military"),
-			countScienceInEvents(timeline, "chemical"),
-			countScienceInEvents(timeline, "production"),
-			countScienceInEvents(timeline, "utility"),
-			countScienceInEvents(timeline, "space"),
-		})
+		base := []int32{
+			int32(m.ID), int32(m.Length), int32(m.Difficulty), int32(len(m.Players)), int32(m.Winner),
+		}
+		record = intSliceToStringSlice(append(append(base, []int32(m.North.TotalFeed)...), []int32(m.South.TotalFeed)...))
 		err = w.Write(record)
 		if err != nil {
 			return
