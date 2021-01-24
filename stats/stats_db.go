@@ -56,9 +56,22 @@ func InsertMatch(match *Match) error {
 	FillPlayersWithELO(match.Players) // Assume all players are present in this slice.
 	match.UpdateMatchELO()
 
-	return db.Clauses(clause.OnConflict{
+	// Insert
+	err := db.Clauses(clause.OnConflict{
 		UpdateAll: true,
 	}).Create(match).Error
+	if err != nil {
+		return err
+	}
+	// Update Players' ELO
+	for _, p := range match.Players {
+		err = db.Model(p.Player).Update("elo", p.Player.ELO).Error
+		if err != nil {
+			log.Println("failed to update player's elo:", err)
+			continue
+		}
+	}
+	return nil
 }
 
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
