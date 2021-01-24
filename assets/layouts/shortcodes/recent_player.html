@@ -25,6 +25,7 @@
         <td>Game length</td>
         <td>Winner</td>
         <td>Difficulty</td>
+        <td>ELO</td>
         </tr>
     </thead>
     <tbody>
@@ -50,7 +51,7 @@ function getPlayerMatchHistory() {
     $.getJSON( "/api/player/"+encodeURIComponent(name)+"/history")
         .done(function(data) {
             $.each(data, function(index, match) {
-                addRecentMatchesEntry(tbl, match.Match, match.Force);
+                addRecentMatchesEntry(tbl, match.Match, match);
             });
 
             showStats();

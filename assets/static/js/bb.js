@@ -73,7 +73,14 @@ function fillShortMatchPlayerEloRow(team, i) {
     if (i >= team.length) {
         return td;
     }
-    td.append(team[i].BeforeELO);
+    if (team[i].GainELO != 0) {
+        let gain = team[i].GainELO.toLocaleString('en-US', {
+            signDisplay: "exceptZero"
+        });
+        td.append(`${team[i].BeforeELO} [${gain}]`);
+    } else {
+        td.append(team[i].BeforeELO);
+    }
     return td;
 }
 
@@ -222,7 +229,7 @@ function getMatchDetails(event) {
         return;
     }
     let tr = $("<tr>")
-        .attr("colSpan", "5")
+        .attr("colSpan", event.data.Span)
         .hide();
     $(this).after(tr);
     tr.fadeIn('fast');
@@ -241,7 +248,7 @@ function getMatchDetails(event) {
             }
             tr.append($("<td>")
                 .append($("<small>").append(tbl))
-                .attr("colSpan", "5")
+                .attr("colSpan", event.data.Span)
                 .attr("align", "center")
             );
         })
@@ -251,15 +258,15 @@ function getMatchDetails(event) {
             tr.append($("<td>")
                 .append("Fetching recent match details failed: " + err));
         });
-    $(this).one("click", {ID: id}, function(event) {
+    $(this).one("click", {ID: id, Span: event.data.Span}, function(event) {
         tr.fadeOut('fast', function() {
             tr.remove();
         });
-        $(this).one("click", {ID: event.data.ID}, getMatchDetails);
+        $(this).one("click", {ID: event.data.ID, Span: event.data.Span}, getMatchDetails);
     });
 }
 
-function addRecentMatchesEntry(tbl, match, force) {
+function addRecentMatchesEntry(tbl, match, more) {
     let ago = moment(match.Start);
     let winner = "Unknown";
     if (match.Winner == 2) {
@@ -277,13 +284,21 @@ function addRecentMatchesEntry(tbl, match, force) {
       .append($("<td>").append(moment.duration(match.Length/1000000).humanize()))
       .append($("<td>").append(winner))
       .append($("<td>").append(diffStr))
-      .one("click", {ID: match.ID}, getMatchDetails);
-    if (force > 1) {
-        if (force == match.Winner) {
-            row.addClass("table-success")
-        } else {
-            row.addClass("table-danger")
+    if (more != undefined) {
+        if (more.Force > 1) {
+            if (more.Force == match.Winner) {
+                row.addClass("table-success")
+            } else {
+                row.addClass("table-danger")
+            }
         }
+        let gain = more.GainELO.toLocaleString('en-US', {
+            signDisplay: "exceptZero"
+        });
+        row.append($("<td>").append(`${more.BeforeELO} [${gain}]`));
+        row.one("click", {ID: match.ID, Span: "6"}, getMatchDetails);
+    } else {
+        row.one("click", {ID: match.ID, Span: "5"}, getMatchDetails);
     }
     tbl.append(row);
 }
