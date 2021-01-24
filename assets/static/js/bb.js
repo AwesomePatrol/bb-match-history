@@ -9,6 +9,16 @@ const diff2str = [
   "Fun and Fast"
   ];
 
+const index2name = [
+	"Automation",
+	"Logistic",
+	"Military",
+	"Chemical",
+	"Production",
+	"Utility",
+	"Space"
+    ];
+
 const urlParams = new URLSearchParams(window.location.search);
 
 function showDifficultyBreakdown() {
@@ -82,6 +92,48 @@ function fillShortMatchPlayerEloRow(team, i) {
         td.append(team[i].BeforeELO);
     }
     return td;
+}
+
+function fillDetails(details) {
+    let tbl_thead = $("<tr>")
+        .addClass("table-secondary")
+        .append($("<td>").append("Stat"))
+        .append($("<td>").append("North Team"))
+        .append($("<td>").append("South Team"));
+    let tbl = $("<table>")
+        .addClass("table")
+        .addClass("table-sm")
+        .addClass("table-hover")
+        .addClass("table-striped")
+        .append($("<thead>").append(tbl_thead));
+    let body = $("<tbody>");
+
+    for (let i=0; i<7; i++) {
+        let tr = $("<tr>");
+        tr.append($("<td>").append(index2name[i]));
+        tr.append($("<td>").append(details.North.TotalFeed[i]));
+        tr.append($("<td>").append(details.South.TotalFeed[i]));
+        body.append(tr);
+    }
+    body.append($("<tr>").append("<td colSpan=\"3\">"));
+    {
+        let tr = $("<tr>");
+        tr.append($("<td>").append("Final Threat"));
+        tr.append($("<td>").append(details.North.FinalThreat));
+        tr.append($("<td>").append(details.South.FinalThreat));
+        body.append(tr);
+    }
+    body.append($("<tr>").append("<td colSpan=\"3\">"));
+    {
+        let tr = $("<tr>");
+        tr.append($("<td>").append("Final Evolution"));
+        tr.append($("<td>").append(details.North.FinalEVO+"%"));
+        tr.append($("<td>").append(details.South.FinalEVO+"%"));
+        body.append(tr);
+    }
+    tbl.append(body);
+
+    return tbl;
 }
 
 function fillShortMatchDetailsRows(details) {
@@ -240,17 +292,17 @@ function getMatchDetails(event) {
     }
     $.getJSON(endpoint + id)
         .done(function(data) {
-            let tbl;
-            if (isLong) {
-                tbl = fillLongMatchDetailsRows(data);
-            } else {
-                tbl = fillShortMatchDetailsRows(data);
-            }
-            tr.append($("<td>")
-                .append($("<small>").append(tbl))
+            let td = $("<td>")
                 .attr("colSpan", event.data.Span)
-                .attr("align", "center")
-            );
+                .attr("align", "center");
+            if (isLong) {
+                td.append($("<small>").append(fillLongMatchDetailsRows(data)));
+            } else {
+                td.append($("<small>").append(fillShortMatchDetailsRows(data)))
+                td.append($("<br>"))
+                    .append($("<small>").append(fillDetails(data)));
+            }
+            tr.append(td);
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
