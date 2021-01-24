@@ -97,7 +97,7 @@ function fillShortMatchDetailsRows(details) {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
             .append($("<td>").append("ELO [" + Math.round(details.North.AvgELO) + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"))
-            .append($("<td>").append("ELO [" + Math.round(details.North.AvgELO) + "]"));
+            .append($("<td>").append("ELO [" + Math.round(details.South.AvgELO) + "]"));
     } else {
         tbl_thead.append($("<td>").append("North Team [" + n_len + "]"))
             .append($("<td>").append("South Team [" + s_len + "]"));
