@@ -95,12 +95,14 @@ func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 	}
 	x := make([]time.Time, len(matches)+1)
 	y := make([]float64, len(matches)+1)
-	x[0] = matches[0].Match.Start
-	y[0] = float64(matches[0].BeforeELO)
-	for i, m := range matches {
+	x[0] = matches[len(matches)-1].Match.Start
+	y[0] = float64(matches[len(matches)-1].BeforeELO)
+	for i := range matches { // reverse order
+		m := matches[len(matches)-1-i]
 		x[i+1] = m.Match.End
 		y[i+1] = float64(m.BeforeELO + m.GainELO)
 	}
+	last_match := matches[0]
 	mainSeries := chart.TimeSeries{
 		Style: chart.Style{
 			StrokeColor: chart.ColorAlternateGray,
@@ -153,6 +155,15 @@ func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 			mainSeries,
 			minSeries,
 			maxSeries,
+			chart.AnnotationSeries{
+				Annotations: []chart.Value2{
+					{
+						XValue: float64(last_match.Match.End.UnixNano()),
+						YValue: float64(last_match.BeforeELO + last_match.GainELO),
+						Label:  fmt.Sprint(last_match.BeforeELO + last_match.GainELO),
+					},
+				},
+			},
 			//chart.LastValueAnnotationSeries(minSeries),
 			//chart.LastValueAnnotationSeries(maxSeries),
 		},
