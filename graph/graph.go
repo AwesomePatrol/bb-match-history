@@ -93,14 +93,16 @@ func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 	if len(matches) == 0 {
 		return fmt.Errorf("no matches to render")
 	}
-	x := make([]time.Time, len(matches)+1)
-	y := make([]float64, len(matches)+1)
-	x[0] = matches[len(matches)-1].Match.Start
-	y[0] = float64(matches[len(matches)-1].BeforeELO)
+	x := make([]time.Time, 2*len(matches))
+	y := make([]float64, 2*len(matches))
+	elo := matches[len(matches)-1].BeforeELO
 	for i := range matches { // reverse order
 		m := matches[len(matches)-1-i]
-		x[i+1] = m.Match.End
-		y[i+1] = float64(m.BeforeELO + m.GainELO)
+		x[i*2] = m.Match.Start
+		y[i*2] = float64(elo)
+		elo += m.GainELO
+		x[i*2+1] = m.Match.End
+		y[i*2+1] = float64(elo)
 	}
 	last_match := matches[0]
 	mainSeries := chart.TimeSeries{
