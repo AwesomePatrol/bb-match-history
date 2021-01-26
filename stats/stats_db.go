@@ -77,7 +77,7 @@ func InsertMatch(match *Match) error {
 }
 
 func GetAllMatchesAfter(after time.Time) (m []Match, err error) {
-	err = db.Where("start > ?", after).Find(&m).Error
+	err = db.Where("start > ?", after).Order("end desc").Find(&m).Error
 	return
 }
 

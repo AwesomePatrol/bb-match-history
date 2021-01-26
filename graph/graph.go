@@ -43,9 +43,22 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 		series[m.Difficulty].YValues = append(series[m.Difficulty].YValues, m.Length.Minutes())
 	}
 
-	graphSeries := make([]chart.Series, 8)
+	graphSeries := make([]chart.Series, 9)
+	annotations := make([]chart.Value2, 8)
 	for i := range series {
 		graphSeries[i] = series[i]
+		annotations[i] = chart.Value2{
+			Style: chart.Style{
+				FontSize:  8,
+				FillColor: chart.Viridis(float64(i), 0, 7),
+			},
+			XValue: chart.TimeToFloat64(matches[0].End),
+			YValue: chart.ValueSequence(series[i].YValues...).Average(),
+			Label:  "-",
+		}
+	}
+	graphSeries[8] = chart.AnnotationSeries{
+		Annotations: annotations,
 	}
 
 	graph := chart.Chart{
