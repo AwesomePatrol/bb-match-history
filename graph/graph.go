@@ -75,6 +75,9 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 				StrokeWidth: 1.0,
 			},
 		},
+		YAxis: chart.YAxis{
+			ValueFormatter: chart.IntValueFormatter,
+		},
 		Series: graphSeries,
 	}
 	graph.Elements = []chart.Renderable{
