@@ -209,5 +209,20 @@ func OpenHTTP(addr string) {
 		}
 		c.Status(http.StatusOK)
 	})
+	router.GET("/api/graph/length/:n", func(c *gin.Context) {
+		n, err := strconv.Atoi(c.Param("n"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		err = graph.RenderScatterGameLength(c.Writer, time.Now().AddDate(0, 0, -n))
+		if err != nil {
+			// FIXME
+			log.Println(err)
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.Status(http.StatusOK)
+	})
 	router.Run(addr)
 }

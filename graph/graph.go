@@ -11,6 +11,66 @@ import (
 	chart "github.com/wcharczuk/go-chart/v2"
 )
 
+func shortMonthDay(v interface{}) string {
+	if typed, isTyped := v.(time.Time); isTyped {
+		return typed.Format("Jan 2")
+	}
+	if typed, isTyped := v.(float64); isTyped {
+		return time.Unix(0, int64(typed)).Format("Jan 2")
+	}
+	return "---"
+}
+
+func RenderScatterGameLength(w io.Writer, after time.Time) error {
+	matches, err := stats.GetAllMatchesAfter(after)
+	if err != nil {
+		return err
+	}
+
+	series := make([]chart.TimeSeries, 8)
+	for i := range series {
+		series[i].Style = chart.Style{
+			StrokeWidth: chart.Disabled,
+			StrokeColor: chart.Viridis(float64(i), 0, 7),
+			DotWidth:    5,
+			DotColor:    chart.Viridis(float64(i), 0, 7),
+		}
+		series[i].Name = difficulty.DifficultyToString(difficulty.Difficulty(i))
+	}
+
+	for _, m := range matches {
+		series[m.Difficulty].XValues = append(series[m.Difficulty].XValues, m.End)
+		series[m.Difficulty].YValues = append(series[m.Difficulty].YValues, m.Length.Minutes())
+	}
+
+	graphSeries := make([]chart.Series, 8)
+	for i := range series {
+		graphSeries[i] = series[i]
+	}
+
+	graph := chart.Chart{
+		Height: 600,
+		Width:  1000,
+		XAxis: chart.XAxis{
+			ValueFormatter: shortMonthDay,
+			GridMajorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateGray,
+				StrokeWidth: 1.0,
+			},
+			GridMinorStyle: chart.Style{
+				StrokeColor: chart.ColorLightGray,
+				StrokeWidth: 1.0,
+			},
+		},
+		Series: graphSeries,
+	}
+	graph.Elements = []chart.Renderable{
+		chart.Legend(&graph),
+	}
+
+	return graph.Render(chart.PNG, w)
+}
+
 func RenderHistogramUPS(w io.Writer, after time.Time) error {
 	avg, err := stats.GetMatchesAverageUPSAll(after)
 	if err != nil {
@@ -132,15 +192,7 @@ func RenderPlayerELO(matches []*stats.GamePlayer, w io.Writer) error {
 		Height: 300,
 		Width:  1000,
 		XAxis: chart.XAxis{
-			ValueFormatter: func(v interface{}) string {
-				if typed, isTyped := v.(time.Time); isTyped {
-					return typed.Format("Jan 2")
-				}
-				if typed, isTyped := v.(float64); isTyped {
-					return time.Unix(0, int64(typed)).Format("Jan 2")
-				}
-				return "---"
-			},
+			ValueFormatter: shortMonthDay,
 			GridMajorStyle: chart.Style{
 				StrokeColor: chart.ColorAlternateGray,
 				StrokeWidth: 1.0,

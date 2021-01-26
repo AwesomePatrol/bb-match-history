@@ -76,6 +76,11 @@ func InsertMatch(match *Match) error {
 	return nil
 }
 
+func GetAllMatchesAfter(after time.Time) (m []Match, err error) {
+	err = db.Where("start > ?", after).Find(&m).Error
+	return
+}
+
 func CountMatchesByDifficulty(diff difficulty.Difficulty, after time.Time) (n int64, err error) {
 	err = db.Model(new(Match)).Where("difficulty = ?", diff).Where("start > ?", after).Count(&n).Error
 	return
