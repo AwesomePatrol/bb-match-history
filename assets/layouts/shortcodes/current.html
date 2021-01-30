@@ -77,7 +77,7 @@ function checkInTeam(name, team) {
         return false;
     }
     for (var i=0, l=team.Players.length; i<l; i++) {
-        if (team.Players[i].Name == name) {
+        if (team.Players[i].Player.Name == name) {
             return true;
         }
     }
@@ -95,7 +95,7 @@ function fillSpec(details) {
 
     let body = $("<tbody>");
     $.each(details.Players, function(index, data) {
-        let name = data.Name;
+        let name = data.Player.Name;
         if (checkInTeam(name, details.North) || checkInTeam(name, details.South)) {
             return;
         }
