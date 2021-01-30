@@ -31,7 +31,7 @@ type GamePlayer struct {
 	MatchID   uint   `json:"-"`
 	Match     *Match `json:",omitempty"`
 	BeforeELO int
-	GainELO   int
+	GainELO   int  `json:",omitempty"`
 	TeamID    uint `json:"-"`
 }
 
