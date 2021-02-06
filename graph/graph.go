@@ -41,6 +41,30 @@ func matchesGameLengthSeries(matches []stats.Match) []chart.TimeSeries {
 	return series
 }
 
+func matchesPlayerCountSeries(matches []stats.Match, counts []stats.MatchPlayerCount) ([]chart.TimeSeries, error) {
+	series := make([]chart.TimeSeries, 8)
+	for i := range series {
+		series[i].Style = chart.Style{
+			StrokeWidth: chart.Disabled,
+			StrokeColor: chart.Viridis(float64(i), 0, 7),
+			DotWidth:    5,
+			DotColor:    chart.Viridis(float64(i), 0, 7),
+		}
+		series[i].Name = difficulty.DifficultyToString(difficulty.Difficulty(i))
+	}
+
+	for i, m := range matches {
+		if cntID, mID := counts[i].MatchID, m.ID; cntID != mID {
+			return nil, fmt.Errorf("id mismatch, count(%d) vs match(%d)", cntID, mID)
+		}
+		n := counts[i].PlayerCount
+		series[m.Difficulty].XValues = append(series[m.Difficulty].XValues, m.End)
+		series[m.Difficulty].YValues = append(series[m.Difficulty].YValues, float64(n))
+	}
+
+	return series, nil
+}
+
 func seriesScatterGraph(series []chart.TimeSeries, last time.Time) *chart.Chart {
 	graphSeries := make([]chart.Series, 9)
 	annotations := make([]chart.Value2, 8)
@@ -92,6 +116,29 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 	}
 
 	series := matchesGameLengthSeries(matches)
+	graph := seriesScatterGraph(series, matches[0].End)
+
+	return graph.Render(chart.PNG, w)
+}
+
+func RenderScatterPlayerCount(w io.Writer, after time.Time) error {
+	matches, err := stats.GetAllMatchesAfter(after)
+	if err != nil {
+		return err
+	}
+
+	cnt, err := stats.GetAllMatchesPlayerCount(after)
+	if err != nil {
+		return err
+	}
+	if cntLen, matchesLen := len(cnt), len(matches); cntLen != matchesLen {
+		return fmt.Errorf("length mismatch between count (%d) and matches (%d)", cntLen, matchesLen)
+	}
+
+	series, err := matchesPlayerCountSeries(matches, cnt)
+	if err != nil {
+		return err
+	}
 	graph := seriesScatterGraph(series, matches[0].End)
 
 	return graph.Render(chart.PNG, w)

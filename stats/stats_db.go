@@ -81,6 +81,16 @@ func GetAllMatchesAfter(after time.Time) (m []Match, err error) {
 	return
 }
 
+type MatchPlayerCount struct {
+	MatchID     uint
+	PlayerCount int64
+}
+
+func GetAllMatchesPlayerCount(after time.Time) (n []MatchPlayerCount, err error) {
+	err = db.Table("game_players").Joins("JOIN matches on game_players.match_id = matches.id").Where("matches.start > ?", after).Select("matches.id as MatchID,count(game_players.match_id) as PlayerCount").Where("game_players.force > 1").Group("game_players.match_id").Order("matches.end desc").Find(&n).Error
+	return
+}
+
 func CountMatchesByDifficulty(diff difficulty.Difficulty, after time.Time) (n int64, err error) {
 	err = db.Model(new(Match)).Where("difficulty = ?", diff).Where("start > ?", after).Count(&n).Error
 	return
