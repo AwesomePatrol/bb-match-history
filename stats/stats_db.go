@@ -106,6 +106,21 @@ func GetMatchesAverageUPSAll(after time.Time) (n []float64, err error) {
 	return
 }
 
+type Evo struct {
+	North, South float32
+	Winner       Force
+	End          time.Time
+}
+
+func GetAllEvo(limit int) (ret []Evo, err error) {
+	err = db.Table("matches").
+		Joins("JOIN teams south ON south.match_id = matches.id").Where("south.is_north = 0").
+		Joins("JOIN teams north ON north.match_id = matches.id").Where("north.is_north = 1").
+		Select("north.final_evo as North,south.final_evo as South,matches.winner as Winner,matches.end as End").
+		Order("matches.start").Limit(limit).Find(&ret).Error
+	return
+}
+
 func QueryGlobalMVP(title string) (mvp []MVPquery, err error) {
 	err = db.Table("mv_pplayers").Where("title = ?", title).Select("name, count(name) as stat, sum(stat) as total").Group("name").Order("stat desc").Limit(10).Scan(&mvp).Error
 	return

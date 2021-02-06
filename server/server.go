@@ -239,5 +239,20 @@ func OpenHTTP(addr string) {
 		}
 		c.Status(http.StatusOK)
 	})
+	router.GET("/api/graph/evos/:n", func(c *gin.Context) {
+		n, err := strconv.Atoi(c.Param("n"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		err = graph.RenderEvoComp(c.Writer, n)
+		if err != nil {
+			// FIXME
+			log.Println(err)
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.Status(http.StatusOK)
+	})
 	router.Run(addr)
 }

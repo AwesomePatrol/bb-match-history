@@ -3,6 +3,7 @@ package graph
 import (
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"time"
 
@@ -117,6 +118,78 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 
 	series := matchesGameLengthSeries(matches)
 	graph := seriesScatterGraph(series, matches[0].End)
+
+	return graph.Render(chart.PNG, w)
+}
+
+func RenderEvoComp(w io.Writer, n int) error {
+	evos, err := stats.GetAllEvo(n)
+	if err != nil {
+		return err
+	}
+	n = len(evos)
+	log.Println(evos)
+
+	// 0 - Winner
+	// 1 - Loser
+	series := make([]chart.TimeSeries, 2)
+	for i := range series {
+		series[i].XValues = make([]time.Time, n)
+		series[i].YValues = make([]float64, n)
+		series[i].Style = chart.Style{
+			StrokeWidth: chart.Disabled,
+			DotWidth:    5,
+		}
+	}
+	series[0].Name = "Winner"
+	series[0].Style.StrokeColor = chart.ColorRed
+	series[0].Style.DotColor = chart.ColorRed
+	series[1].Name = "Loser"
+	series[1].Style.StrokeColor = chart.ColorBlue
+	series[1].Style.DotColor = chart.ColorBlue
+	for i, e := range evos {
+		w, l := e.North, e.South
+		if e.Winner == stats.South {
+			w, l = l, w
+		}
+		series[0].YValues[i] = float64(w)
+		series[0].XValues[i] = e.End
+		series[1].YValues[i] = float64(-l)
+		series[1].XValues[i] = e.End
+	}
+	graph := chart.Chart{
+		Height: 600,
+		Width:  1000,
+		XAxis: chart.XAxis{
+			ValueFormatter: shortMonthDay,
+			GridMajorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateGray,
+				StrokeWidth: 1.0,
+			},
+			GridMinorStyle: chart.Style{
+				StrokeColor: chart.ColorLightGray,
+				StrokeWidth: 1.0,
+			},
+		},
+		YAxis: chart.YAxis{
+			ValueFormatter: chart.IntValueFormatter,
+			GridMinorStyle: chart.Style{
+				StrokeColor: chart.ColorLightGray,
+				StrokeWidth: 1.0,
+			},
+			Range: &chart.ContinuousRange{
+				Min: -160,
+				Max: 160,
+			},
+		},
+		Series: []chart.Series{
+			series[0],
+			series[1],
+		},
+	}
+	graph.Elements = []chart.Renderable{
+		chart.Legend(&graph),
+	}
 
 	return graph.Render(chart.PNG, w)
 }
