@@ -21,12 +21,7 @@ func shortMonthDay(v interface{}) string {
 	return "---"
 }
 
-func RenderScatterGameLength(w io.Writer, after time.Time) error {
-	matches, err := stats.GetAllMatchesAfter(after)
-	if err != nil {
-		return err
-	}
-
+func matchesGameLengthSeries(matches []stats.Match) []chart.TimeSeries {
 	series := make([]chart.TimeSeries, 8)
 	for i := range series {
 		series[i].Style = chart.Style{
@@ -43,6 +38,10 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 		series[m.Difficulty].YValues = append(series[m.Difficulty].YValues, m.Length.Minutes())
 	}
 
+	return series
+}
+
+func seriesScatterGraph(series []chart.TimeSeries, last time.Time) *chart.Chart {
 	graphSeries := make([]chart.Series, 9)
 	annotations := make([]chart.Value2, 8)
 	for i := range series {
@@ -52,7 +51,7 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 				FontSize:  8,
 				FillColor: chart.Viridis(float64(i), 0, 7),
 			},
-			XValue: chart.TimeToFloat64(matches[0].End),
+			XValue: chart.TimeToFloat64(last),
 			YValue: chart.ValueSequence(series[i].YValues...).Average(),
 			Label:  "-",
 		}
@@ -83,6 +82,17 @@ func RenderScatterGameLength(w io.Writer, after time.Time) error {
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),
 	}
+	return &graph
+}
+
+func RenderScatterGameLength(w io.Writer, after time.Time) error {
+	matches, err := stats.GetAllMatchesAfter(after)
+	if err != nil {
+		return err
+	}
+
+	series := matchesGameLengthSeries(matches)
+	graph := seriesScatterGraph(series, matches[0].End)
 
 	return graph.Render(chart.PNG, w)
 }
