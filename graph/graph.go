@@ -3,8 +3,8 @@ package graph
 import (
 	"fmt"
 	"io"
-	"log"
 	"math"
+	"strconv"
 	"time"
 
 	"github.com/awesomepatrol/bb-match-history/stats"
@@ -128,13 +128,12 @@ func RenderEvoComp(w io.Writer, n int) error {
 		return err
 	}
 	n = len(evos)
-	log.Println(evos)
 
 	// 0 - Winner
 	// 1 - Loser
-	series := make([]chart.TimeSeries, 2)
+	series := make([]chart.ContinuousSeries, 2)
 	for i := range series {
-		series[i].XValues = make([]time.Time, n)
+		series[i].XValues = make([]float64, n)
 		series[i].YValues = make([]float64, n)
 		series[i].Style = chart.Style{
 			StrokeWidth: chart.Disabled,
@@ -147,29 +146,43 @@ func RenderEvoComp(w io.Writer, n int) error {
 	series[1].Name = "Loser"
 	series[1].Style.StrokeColor = chart.ColorBlue
 	series[1].Style.DotColor = chart.ColorBlue
+
+	ticks := make([]chart.Tick, n)
+
 	for i, e := range evos {
 		w, l := e.North, e.South
 		if e.Winner == stats.South {
 			w, l = l, w
 		}
+		i := n - i - 1
 		series[0].YValues[i] = float64(w)
-		series[0].XValues[i] = e.End
-		series[1].YValues[i] = float64(-l)
-		series[1].XValues[i] = e.End
+		series[0].XValues[i] = float64(i)
+		series[1].YValues[i] = float64(l)
+		series[1].XValues[i] = float64(i)
+
+		ticks[i].Value = float64(i)
+		switch i {
+		case 0:
+			ticks[i].Label = "oldest"
+		case n - 1:
+			ticks[i].Label = "newest"
+		default:
+			ticks[i].Label = strconv.Itoa(int(e.ID))
+		}
 	}
 	graph := chart.Chart{
 		Height: 600,
 		Width:  1000,
 		XAxis: chart.XAxis{
-			ValueFormatter: shortMonthDay,
 			GridMajorStyle: chart.Style{
 				StrokeColor: chart.ColorAlternateGray,
 				StrokeWidth: 1.0,
 			},
 			GridMinorStyle: chart.Style{
-				StrokeColor: chart.ColorLightGray,
+				StrokeColor: chart.ColorAlternateGray,
 				StrokeWidth: 1.0,
 			},
+			Ticks: ticks,
 		},
 		YAxis: chart.YAxis{
 			ValueFormatter: chart.IntValueFormatter,
@@ -178,13 +191,13 @@ func RenderEvoComp(w io.Writer, n int) error {
 				StrokeWidth: 1.0,
 			},
 			Range: &chart.ContinuousRange{
-				Min: -160,
+				Min: 0,
 				Max: 160,
 			},
 		},
 		Series: []chart.Series{
-			series[0],
 			series[1],
+			series[0],
 		},
 	}
 	graph.Elements = []chart.Renderable{
