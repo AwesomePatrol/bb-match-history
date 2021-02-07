@@ -15,6 +15,9 @@ var router *gin.Engine
 func OpenHTTP(addr string) {
 	router = gin.Default()
 
+	router.Use(func(c *gin.Context) {
+		c.Header("Cache-Control", "max-age=3600")
+	})
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/recent")
 	})
