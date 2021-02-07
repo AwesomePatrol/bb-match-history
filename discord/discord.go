@@ -303,6 +303,9 @@ func parseCurrent(s *discordgo.Session, chanID string, t time.Time) {
 			NewMatch(chanID)
 		}
 	}
+	sort.Slice(currentMatch[chanID].Timeline, func(i, j int) bool {
+		return currentMatch[chanID].Timeline[i].Timestamp.Before(currentMatch[chanID].Timeline[i].Timestamp)
+	})
 }
 
 // scanChannels lists channels on all guilds and adds them to watched lists when they match a
