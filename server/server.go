@@ -28,6 +28,9 @@ func OpenHTTP(addr string) {
 
 	api := router.Group("/api")
 	api.Use(gzip.Gzip(gzip.DefaultCompression))
+	api.Use(func(c *gin.Context) {
+		c.Header("Cache-Control", "no-store, max-age=0")
+	})
 	api.GET("/player/:name/history", PlayerHistory)
 	api.GET("/player/:name/details", PlayerDetails)
 	api.GET("/match/short/:id", MatchShort)
