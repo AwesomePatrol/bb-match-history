@@ -83,7 +83,7 @@ function fillShortMatchPlayerEloRow(team, i) {
     if (i >= team.length) {
         return td;
     }
-    if (team[i].GainELO != 0) {
+    if (team[i].GainELO != undefined && team[i].GainELO != 0) {
         let gain = team[i].GainELO.toLocaleString('en-US', {
             signDisplay: "exceptZero"
         });
@@ -348,6 +348,9 @@ function addRecentMatchesEntry(tbl, match, more) {
             } else {
                 row.addClass("table-danger")
             }
+        }
+        if (more.GainELO == undefined) {
+            more.GainELO = 0;
         }
         let gain = more.GainELO.toLocaleString('en-US', {
             signDisplay: "exceptZero"
