@@ -5,6 +5,7 @@ import (
 
 	"github.com/awesomepatrol/bb-match-history/discord"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,7 @@ func OpenHTTP(addr string) {
 	router.Use(static.Serve("/", static.LocalFile("assets/public", false)))
 
 	api := router.Group("/api")
+	api.Use(gzip.Gzip(gzip.DefaultCompression))
 	api.GET("/player/:name/history", PlayerHistory)
 	api.GET("/player/:name/details", PlayerDetails)
 	api.GET("/match/short/:id", MatchShort)
