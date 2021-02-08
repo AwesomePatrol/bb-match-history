@@ -19,7 +19,7 @@ type EmptyModel struct {
 type Player struct {
 	EmptyModel
 	Name    string        `gorm:"unique"`
-	ELO     int           `gorm:"default:800"`
+	ELO     int           `gorm:"default:800;index:,sort:desc"`
 	History []*GamePlayer `gorm:"foreignkey:PlayerID" json:",omitempty"`
 }
 
@@ -28,7 +28,7 @@ type GamePlayer struct {
 	PlayerID  uint    `json:"-"`
 	Player    *Player `json:",omitempty"`
 	Force     Force
-	MatchID   uint   `json:"-"`
+	MatchID   uint   `gorm:"index" json:"-"`
 	Match     *Match `json:",omitempty"`
 	BeforeELO int
 	GainELO   int  `json:",omitempty"`
@@ -62,7 +62,7 @@ type Team struct {
 	FinalEVO    float32
 	FinalThreat int
 	IsNorth     bool `gorm:"type:bool" json:"-"`
-	MatchID     uint `json:"-"`
+	MatchID     uint `gorm:"index" json:"-"`
 }
 
 type EventType int64
@@ -124,8 +124,8 @@ type Match struct {
 	Model
 	Players      []*GamePlayer `gorm:"foreignkey:MatchID" json:",omitempty"`
 	South, North *Team         `gorm:"foreignkey:MatchID" json:",omitempty"`
-	Start        time.Time     `gorm:"UNIQUE" json:",omitempty"`
-	End          time.Time     `json:",omitempty"`
+	Start        time.Time     `gorm:"uniqueIndex" json:",omitempty"`
+	End          time.Time     `gorm:"index" json:",omitempty"`
 	Length       time.Duration
 	Winner       Force
 	Difficulty   difficulty.Difficulty `sql:"type:difficulty"`
