@@ -5,9 +5,7 @@ Hosted on: https://bb-raven.patrol.neutrino.re/recent/ (legacy version: http://b
 ## Run
 
 ```bash
-$ cd assets
-$ hugo
-$ cd ..
+$ hugo -s assets
 $ go run main.go -addr :8080 -db path_to.db -t discord_bot_token
 ```
 
