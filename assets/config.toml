@@ -13,7 +13,7 @@ theme = "minimal-bootstrap-hugo-theme"
   navbarBackgroundColor = "#212529"
   navbarLinkColor = "rgba(255, 255, 255, 0.75)"
   navbarLinkHoverColor = "rgba(255, 255, 255, 1)"
-  wrapperMaxWidth = "800px"
+  wrapperMaxWidth = "1000px"
   faviconThemeColor = "#ffffff"
 
 [menu]
